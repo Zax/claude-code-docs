@@ -19,11 +19,22 @@ I file vengono caricati in ordine, dal più generico al più specifico (il più 
 | `<root-progetto>/CLAUDE.local.md` | Personale progetto | Da mettere in `.gitignore` |
 | `<sottocartella>/CLAUDE.md` | Sotto-directory | Caricato lazy, solo se si lavora lì |
 
+## Composizione multi-livello
+
+I file CLAUDE.md si compongono: Claude legge tutti i livelli simultaneamente. Questo permette di separare le preoccupazioni:
+
+- **Globale** (`~/.claude/CLAUDE.md`): preferenze personali (tono, formato, regole ASCII)
+- **Progetto** (root del repo): vincoli specifici del progetto
+- **Sottodirectory**: regole specifiche di area (es. `frontend/CLAUDE.md`, `api/CLAUDE.md`)
+
+Si possono anche creare **profili specializzati** per casi d'uso diversi (coding puro, automazione con agenti, analisi dati) con regole mirate per ciascuno.
+
 ## Best practice
 
 - **Max ~200 righe** per file. File troppo lunghi consumano contesto e riducono l'aderenza alle istruzioni
 - **Non duplicare** ciò che Claude può inferire dal codice (es. "questo è un progetto TypeScript" con un `package.json` presente)
 - **Istruzioni specifiche e verificabili**, non vaghe ("segui le best practice")
+  - Esempio: invece di "sii conciso", meglio "quando uno step fallisce, fermati immediatamente e riporta l'errore completo con traceback prima di tentare qualsiasi fix"
 - Usa **header e bullet point** per strutturare — Claude legge la struttura come un lettore umano
 - Metti in `CLAUDE.md` solo ciò che serve in **ogni sessione**
 - Per documentazione ad-hoc, usa `docs/` e referenzia con `@docs/filename.md`

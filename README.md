@@ -15,6 +15,12 @@ Raccolta di informazioni utili, best practice e risorse per l'uso efficace di Cl
 7. [Tips & Tricks](docs/tips-e-tricks.md) — Consigli pratici per l'uso quotidiano
 8. [Link Utili](docs/link-utili.md) — Risorse e riferimenti esterni
 
+## Fonti esterne analizzate
+
+Report di analisi di repository e risorse esterne da cui sono state estratte informazioni:
+
+- [claude-token-efficient](docs/fonti-esterne/claude-token-efficient.md) — Ottimizzazione token e riduzione verbosità (~63%)
+
 ---
 
 *Ultimo aggiornamento: 31 marzo 2026*
