@@ -89,6 +89,57 @@ Disponibili ma non consigliati per nuovi progetti. Usa le versioni 4.x sopra.
 
 ---
 
+## Extended Thinking (Ragionamento esteso)
+
+Alcuni modelli possono "pensare" prima di rispondere, mostrando il ragionamento passo per passo in blocchi separati (`thinking` blocks). Utile per task complessi; da evitare per domande semplici (spreco di token).
+
+### Modalità disponibili
+
+**Adattiva** — consigliata per Opus 4.6 e Sonnet 4.6
+Il modello decide autonomamente quanto pensare in base alla complessità del task. Si controlla con il parametro `effort`:
+
+```python
+thinking={"type": "adaptive", "effort": "high"}  # low | medium | high
+```
+
+**Manuale** — disponibile su tutti i modelli con extended thinking, deprecata su Opus/Sonnet 4.6
+Si specifica un budget fisso di token per il ragionamento:
+
+```python
+thinking={"type": "enabled", "budget_tokens": 10000}
+```
+
+Il `budget_tokens` deve essere inferiore a `max_tokens`.
+
+### Visualizzazione del thinking
+
+| Opzione `display` | Effetto |
+|-------------------|---------|
+| `"summarized"` (default) | Restituisce un riassunto del ragionamento |
+| `"omitted"` | Nasconde il thinking, streaming più veloce |
+
+In entrambi i casi vieni addebitato per i **token di thinking completi**.
+
+### Quando usarlo
+
+| Scenario | Consiglio |
+|----------|-----------|
+| Matematica, logica, algoritmi complessi | `effort: "high"` o budget alto |
+| Coding con molte dipendenze | `effort: "medium"` |
+| Domande semplici, chat, classificazione | Non usarlo |
+
+### Supporto per modello
+
+| Modello | Extended thinking | Adaptive thinking |
+|---------|:-----------------:|:-----------------:|
+| Opus 4.6 | ✓ | ✓ |
+| Sonnet 4.6 | ✓ | ✓ |
+| Haiku 4.5 | ✓ | — |
+
+> Con tool use e thinking abilitato, il modello può ragionare tra una chiamata e l'altra (interleaved thinking). I blocchi di thinking vanno passati invariati nelle richieste successive per mantenere la continuità del ragionamento.
+
+---
+
 ## Note pratiche
 
 - I modelli sono disponibili su **Anthropic API**, **AWS Bedrock** e **Google Vertex AI** con ID leggermente diversi
