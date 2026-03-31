@@ -11,8 +11,6 @@
 - [Anthropic Cookbook (GitHub)](https://github.com/anthropics/anthropic-cookbook)
 - [Claude Code Best Practices (GitHub)](https://github.com/shanraisshan/claude-code-best-practice)
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← Tips & Tricks](tips-e-tricks.md) | [Successivo: Plugin →](plugin.md)

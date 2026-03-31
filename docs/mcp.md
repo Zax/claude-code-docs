@@ -18,8 +18,6 @@ claude mcp add <nome-server> -- <comando>
 
 Senza MCP, Claude Code può solo leggere file ed eseguire comandi bash. Con MCP può interrogare database, creare ticket Jira, fare review su GitHub, controllare errori su Sentry, ecc.
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← Claude API](api.md) | [Successivo: Limiti e Pricing →](limiti-e-pricing.md)

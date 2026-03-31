@@ -22,8 +22,6 @@ Un file `CLAUDE.md` ben strutturato con regole anti-verbosità può ridurre i to
 
 > **Nota**: il file CLAUDE.md stesso consuma token di input ad ogni messaggio. Il risparmio netto è positivo solo con volumi sufficienti. Per uso occasionale può costare più di quanto fa risparmiare.
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← MCP](mcp.md) | [Successivo: Tips & Tricks →](tips-e-tricks.md)

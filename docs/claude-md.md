@@ -97,8 +97,6 @@ App gestionale con backend C# (.NET 8 Web API) e frontend AngularJS 1.x.
 - Il progetto usa AngularJS 1.x, NON Angular 2+. Non suggerire sintassi Angular moderna.
 ```
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← Setup](setup.md) | [Successivo: Prompting →](prompting.md)

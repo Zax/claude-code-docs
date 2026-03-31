@@ -25,8 +25,6 @@ I plugin estendono le capacità di Claude Code con workflow, skill e automazioni
 | [Superpowers](plugin/superpowers.md) | Framework agentico con skill per TDD, debugging sistematico, pianificazione e code review |
 | [Claude-Mem](plugin/claude-mem.md) | Memoria persistente tra sessioni con compressione AI e ricerca semantica |
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← Link Utili](link-utili.md)

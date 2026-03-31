@@ -12,8 +12,6 @@ Informazioni sull'API, modelli disponibili, parametri, streaming, tool use.
 | Claude Sonnet 4.6 | `claude-sonnet-4-6` | Coding, uso quotidiano, miglior rapporto qualità/costo |
 | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | Task veloci, basso costo |
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← Prompting](prompting.md) | [Successivo: MCP →](mcp.md)

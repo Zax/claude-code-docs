@@ -29,8 +29,6 @@ Claude Code tende ad essere verboso per default. È possibile ridurre l'output d
 - **Prima di dichiarare "fatto"**: eseguire il codice un'ultima volta — mai dichiarare fatto senza un test che passa
 - **"Tre righe simili sono meglio di un'astrazione prematura"**: evitare over-engineering
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← Limiti e Pricing](limiti-e-pricing.md) | [Successivo: Link Utili →](link-utili.md)

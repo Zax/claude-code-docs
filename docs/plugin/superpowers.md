@@ -86,5 +86,3 @@ Il workflow tipico:
 
 - Discord: https://discord.gg/Jd8Vphy9jq
 - Issues: https://github.com/obra/superpowers/issues
-
-<!-- Aggiungi qui le tue scoperte -->

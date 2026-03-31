@@ -16,7 +16,6 @@ Raccolta di documentazione personale sull'uso di Claude Code, organizzata in fil
 - Titolo H1 coerente con l'argomento
 - Link di navigazione in testa: `← [Indice](../README.md)` + eventuali precedente/successivo
 - Contenuto della sezione
-- Commento `<!-- Aggiungi qui le tue scoperte -->` dove opportuno, per segnalare punti di espansione futura
 
 ## Convenzioni
 - Naming file: kebab-case, estensione `.md` (es. `tips-e-tricks.md`)

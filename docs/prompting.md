@@ -35,8 +35,6 @@ Un metodo efficace per migliorare è chiedere all'AI di **analizzare le proprie 
 
 > È importante chiedere sia punti di forza che debolezze: chiedere solo i punti di forza genera elogi generici, solo le debolezze produce critiche decontestualizzate.
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [← CLAUDE.md](claude-md.md) | [Successivo: Claude API →](api.md)

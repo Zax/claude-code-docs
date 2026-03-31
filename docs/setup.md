@@ -81,8 +81,6 @@ Funziona anche con Cursor e altri editor moderni.
 
 Esiste anche un'app desktop per usare Claude Code senza terminale, disponibile per macOS e Windows dalla documentazione ufficiale.
 
-<!-- Aggiungi qui le tue scoperte -->
-
 ---
 
 [Successivo: CLAUDE.md - Memoria di Progetto →](claude-md.md)

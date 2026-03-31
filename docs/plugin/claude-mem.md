@@ -79,5 +79,3 @@ Si filtra prima di recuperare i dettagli, evitando di caricare tutto in contesto
 
 - Documentazione: https://docs.claude-mem.ai
 - Discord: https://discord.com/invite/J4wttp9vDu
-
-<!-- Aggiungi qui le tue scoperte -->

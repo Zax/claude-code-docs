@@ -1,6 +1,6 @@
 # Claude Code - Knowledge Base
 
-Raccolta di informazioni utili, best practice e risorse per l'uso efficace di Claude Code nei miei progetti.
+Raccolta di informazioni utili, best practice e risorse per l'uso efficace di Claude Code nei progetti.
 
 ---
 
