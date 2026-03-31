@@ -1,4 +1,4 @@
-← [Indice](../README.md) | [← Setup](setup.md)
+[← Indice](../README.md) | [← Setup](setup.md)
 
 # CLAUDE.md - Memoria di Progetto
 
@@ -28,6 +28,14 @@ I file CLAUDE.md si compongono: Claude legge tutti i livelli simultaneamente. Qu
 - **Sottodirectory**: regole specifiche di area (es. `frontend/CLAUDE.md`, `api/CLAUDE.md`)
 
 Si possono anche creare **profili specializzati** per casi d'uso diversi (coding puro, automazione con agenti, analisi dati) con regole mirate per ciascuno.
+
+## Lingua del file
+
+Claude interpreta il CLAUDE.md con la stessa precisione in qualsiasi lingua. Non c'è differenza tecnica tra scriverlo in italiano o in inglese.
+
+La scelta pratica:
+- **Italiano** (o la lingua del team): più leggibile per chi mantiene il file, coerente con il contesto di lavoro
+- **Inglese**: preferibile se il progetto è condiviso con persone non italofone o pubblicato open source
 
 ## Best practice
 
@@ -69,34 +77,5 @@ claude /init
 ## Auto Memory
 
 Da Claude Code v2.1.59+, Claude può accumulare conoscenza automaticamente tra le sessioni, salvando note su comandi di build, insight di debug, preferenze di stile. È attivabile/disattivabile con `/memory`.
-
-## Esempio per un progetto C# + AngularJS
-
-```markdown
-# CLAUDE.md
-
-## Progetto
-App gestionale con backend C# (.NET 8 Web API) e frontend AngularJS 1.x.
-
-## Comandi
-- `dotnet build` — Build del backend
-- `dotnet test` — Esegui test
-- `npm start` — Avvia frontend dev server
-
-## Convenzioni
-- Backend: C# con naming PascalCase, architettura a layer (Controllers → Services → Repositories)
-- Frontend: AngularJS 1.x, controller con suffisso `Ctrl`, servizi con suffisso `Service`
-- API RESTful con rotte in kebab-case
-
-## Regole
-- MAI usare `var` in C# quando il tipo non è evidente
-- SEMPRE aggiungere XML doc comments sui metodi pubblici
-- SEMPRE usare `$http` tramite service dedicati, mai direttamente nei controller
-
-## Gotchas
-- Il progetto usa AngularJS 1.x, NON Angular 2+. Non suggerire sintassi Angular moderna.
-```
-
----
 
 [← Setup](setup.md) | [Successivo: Prompting →](prompting.md)
