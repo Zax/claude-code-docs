@@ -15,4 +15,4 @@
 
 ---
 
-[← Tips & Tricks](tips-e-tricks.md)
+[← Tips & Tricks](tips-e-tricks.md) | [Successivo: Plugin →](plugin.md)
