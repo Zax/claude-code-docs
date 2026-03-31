@@ -20,6 +20,7 @@ Raccolta di informazioni utili, best practice e risorse per l'uso efficace di Cl
 Report di analisi di repository e risorse esterne da cui sono state estratte informazioni:
 
 - [claude-token-efficient](docs/fonti-esterne/claude-token-efficient.md) — Ottimizzazione token e riduzione verbosità (~63%)
+- [analisi-come-parli-allai](docs/fonti-esterne/analisi-come-parli-allai.md) — Auto-analisi del proprio stile di prompting
 
 ---
 
