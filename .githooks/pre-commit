@@ -1,0 +1,2 @@
+#!/bin/sh
+python3 scripts/build-html.py && git add claude-code-docs.html
