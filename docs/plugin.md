@@ -1,4 +1,4 @@
-1← [Indice](../README.md) | [← Link Utili](link-utili.md)
+← [Indice](../README.md) | [← Stato del Servizio](status.md)
 
 # Plugin
 

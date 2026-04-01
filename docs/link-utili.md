@@ -13,4 +13,4 @@
 
 ---
 
-[← Tips & Tricks](tips-e-tricks.md) | [Successivo: Plugin →](plugin.md)
+[← Tips & Tricks](tips-e-tricks.md) | [Successivo: Stato del Servizio →](status.md)
