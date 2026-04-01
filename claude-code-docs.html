@@ -266,6 +266,8 @@ pre { font-size: .8em; }
         <li><a href="#limiti-e-pricing" id="toc-limiti-e-pricing">Limiti
         e Pricing</a>
         <ul>
+        <li><a href="#contesto-e-consumo-token" id="toc-contesto-e-consumo-token">Contesto e consumo
+        token</a></li>
         <li><a href="#ottimizzazione-dei-token" id="toc-ottimizzazione-dei-token">Ottimizzazione dei
         token</a></li>
         </ul></li>
@@ -1069,6 +1071,21 @@ pre { font-size: .8em; }
       <p>Per uso frequente di Claude Code, un abbonamento Max è
       generalmente più economico rispetto al pay-per-use via API.</p>
       </blockquote>
+      <h2 id="contesto-e-consumo-token">Contesto e consumo token</h2>
+      <p>La dimensione della finestra di contesto (200K o 1M token)
+      <strong>non aumenta di per sé il consumo</strong>. Paghi
+      esattamente i token che inserisci + quelli generati in output,
+      indipendentemente da quanta finestra sia disponibile.</p>
+      <p><strong>Puoi spendere di più indirettamente</strong> se sfrutti
+      la finestra più grande includendo più contenuto: storia della
+      conversazione più lunga, più file in contesto, sessioni Claude
+      Code senza <code>/compact</code>.</p>
+      <p><strong>Prompt caching</strong> — su contesti lunghi il
+      contenuto ripetuto (system prompt, file statici) viene cachato e
+      ricaricato a ~10% del costo normale. Su Opus 4.6 con 1M di
+      contesto è particolarmente conveniente per sessioni con molti file
+      condivisi.</p>
+      <hr />
       <h2 id="ottimizzazione-dei-token">Ottimizzazione dei token</h2>
       <p>Un file <code>CLAUDE.md</code> ben strutturato con regole
       anti-verbosità può ridurre i token di output di circa il 63%
