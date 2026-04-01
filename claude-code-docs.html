@@ -4,1242 +4,1760 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claude Code - Knowledge Base</title>
-  <style>
+  <style type="text/css">
 :root {
-  --color-text: #1f2328;
-  --color-muted: #656d76;
-  --color-border: #d0d7de;
-  --color-bg-subtle: #f6f8fa;
-  --color-accent: #0969da;
+--sidebar-width: 260px;
+--sidebar-bg: #f8f9fa;
+--sidebar-border:#a2a9b1;
+--accent: #0645ad;
+--text: #202122;
+--muted: #54595d;
+--border: #a2a9b1;
+--bg-code: #f6f8fa;
+--border-code: #d0d7de;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont,
+'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px;
+line-height: 1.6; color: var(--text); background: #fff; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--color-text);
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+#layout {
+display: flex;
+min-height: 100vh;
 }
 
-header {
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+#sidebar {
+width: var(--sidebar-width);
+flex-shrink: 0;
+background: var(--sidebar-bg);
+border-right: 1px solid var(--sidebar-border);
+position: sticky;
+top: 0;
+height: 100vh;
+overflow: hidden;
+transition: width .2s ease;
 }
 
-header h1 { margin: 0 0 .3em; font-size: 2rem; }
-.subtitle  { margin: 0; color: var(--color-muted); }
-
-nav#toc {
-  background: var(--color-bg-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 2.5rem;
-  font-size: .9rem;
+#sidebar.collapsed {
+width: 18px;
+background: transparent;
+border-right: none;
 }
 
-nav#toc strong { display: block; margin-bottom: .5em; font-size: 1rem; }
-nav#toc ul { margin: .25em 0 .25em 1.2em; padding: 0; }
-nav#toc li { margin: .15em 0; list-style: disc; }
-nav#toc a { color: var(--color-accent); text-decoration: none; }
-nav#toc a:hover { text-decoration: underline; }
+#sidebar-toggle {
+position: fixed;
+top: .55rem;
+left: calc(var(--sidebar-width) - 22px);
+z-index: 100;
+background: none;
+border: none;
+cursor: pointer;
+font-size: .7rem;
+color: var(--muted);
+opacity: .45;
+padding: .2rem .25rem;
+border-radius: 3px;
+line-height: 1;
+transition: left .2s ease, opacity .15s;
+}
+#sidebar-toggle:hover { opacity: 1; background: rgba(0,0,0,.06); }
 
-h1, h2, h3, h4 { margin-top: 1.75em; margin-bottom: .5em; font-weight: 600; line-height: 1.3; }
-h1 { font-size: 1.75rem; border-bottom: 2px solid var(--color-border); padding-bottom: .3em; }
-h2 { font-size: 1.3rem;  border-bottom: 1px solid var(--color-border); padding-bottom: .25em; }
+#sidebar.collapsed #sidebar-toggle {
+left: 2px;
+opacity: .25;
+font-size: .65rem;
+}
+#sidebar-body {
+overflow-y: auto;
+overflow-x: hidden;
+height: 100%;
+padding: 2.5rem .75rem .75rem;
+width: var(--sidebar-width);
+transition: opacity .15s ease;
+}
+#sidebar.collapsed #sidebar-body {
+opacity: 0;
+pointer-events: none;
+}
+
+#sidebar-body nav#TOC,
+#sidebar-body div#TOC { margin: 0; }
+#sidebar-body nav#TOC > ul,
+#sidebar-body div#TOC > ul { margin: 0; padding-left: 1rem; }
+#sidebar-body ul { list-style: none; padding-left: .9rem; margin: .2rem 0; }
+#sidebar-body li { margin: .2rem 0; }
+#sidebar-body a {
+color: var(--accent);
+text-decoration: none;
+font-size: .85rem;
+line-height: 1.4;
+display: block;
+}
+#sidebar-body a:hover { text-decoration: underline; }
+
+#content {
+flex: 1;
+min-width: 0;
+padding: 2rem 3rem 4rem;
+max-width: 860px;
+}
+#doc-header {
+border-bottom: 1px solid var(--border);
+margin-bottom: 2rem;
+padding-bottom: 1rem;
+}
+#doc-title { margin: 0 0 .25em; font-size: 1.9rem; }
+#doc-subtitle { margin: 0; color: var(--muted); font-size: .95rem; }
+
+h1, h2, h3, h4 { margin-top: 1.75em; margin-bottom: .4em;
+font-weight: 600; line-height: 1.3; }
+h1 { font-size: 1.7rem; border-bottom: 2px solid var(--border); padding-bottom: .25em; }
+h2 { font-size: 1.3rem; border-bottom: 1px solid var(--border); padding-bottom: .2em; }
 h3 { font-size: 1.05rem; }
-
-a { color: var(--color-accent); }
-
-p { margin: .75em 0; }
+p { margin: .7em 0; }
+a { color: var(--accent); }
 
 code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: .875em;
-  background: var(--color-bg-subtle);
-  padding: .15em .4em;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
+font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+font-size: .875em;
+background: var(--bg-code);
+padding: .15em .4em;
+border-radius: 4px;
+border: 1px solid var(--border-code);
 }
-
 pre {
-  background: var(--color-bg-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1rem;
-  overflow-x: auto;
-  line-height: 1.5;
+background: var(--bg-code);
+border: 1px solid var(--border-code);
+border-radius: 6px;
+padding: 1rem;
+overflow-x: auto;
+line-height: 1.5;
+margin: 1em 0;
 }
+pre code { background: none; border: none; padding: 0; font-size: .875em; }
 
-pre code {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: .875em;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1em 0;
-  font-size: .9em;
-}
-
-th, td { border: 1px solid var(--color-border); padding: .5em .75em; text-align: left; }
-th { background: var(--color-bg-subtle); font-weight: 600; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: .9em; }
+th, td { border: 1px solid var(--border); padding: .45em .75em; text-align: left; }
+th { background: var(--bg-code); font-weight: 600; }
 tr:nth-child(even) td { background: #fafbfc; }
 
 blockquote {
-  border-left: 4px solid var(--color-border);
-  margin: 1em 0;
-  padding: .5em 1em;
-  color: var(--color-muted);
+border-left: 4px solid var(--border);
+margin: 1em 0;
+padding: .4em 1em;
+color: var(--muted);
 }
-
 blockquote p { margin: 0; }
 
-hr {
-  border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 2.5rem 0;
-}
-
+hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 ul, ol { padding-left: 1.5em; margin: .5em 0; }
 li { margin: .3em 0; }
 
-@media (max-width: 600px) {
-  body { padding: 1rem; }
-  table { font-size: .8em; }
-  pre { font-size: .8em; }
+@media (max-width: 767px) {
+#content { padding: 1rem 1.25rem 3rem; }
+table { font-size: .8em; }
+pre { font-size: .8em; }
 }
-
-  </style>
+</style>
 </head>
 <body>
-  <header>
-    <h1>Claude Code - Knowledge Base</h1>
-    <p class="subtitle">Documentazione personale sull'uso di Claude Code</p>
-  </header>
-  <nav id="toc">
-    <strong>Indice</strong>
-    <div class="toc">
-<ul>
-<li><a href="#setup-claude-code">Setup Claude Code</a><ul>
-<li><a href="#requisiti">Requisiti</a></li>
-<li><a href="#installazione-metodo-consigliato-native-installer">Installazione - Metodo consigliato (Native Installer)</a></li>
-<li><a href="#installazione-alternativa-npm">Installazione alternativa (npm)</a></li>
-<li><a href="#installazione-su-windows-con-wsl">Installazione su Windows con WSL</a></li>
-<li><a href="#autenticazione">Autenticazione</a></li>
-<li><a href="#verifica-e-diagnostica">Verifica e diagnostica</a></li>
-<li><a href="#integrazione-con-vs-code">Integrazione con VS Code</a></li>
-<li><a href="#desktop-app">Desktop App</a></li>
-</ul>
-</li>
-<li><a href="#claudemd-memoria-di-progetto">CLAUDE.md - Memoria di Progetto</a><ul>
-<li><a href="#cose">Cos'è</a></li>
-<li><a href="#gerarchia-dei-file">Gerarchia dei file</a></li>
-<li><a href="#composizione-multi-livello">Composizione multi-livello</a></li>
-<li><a href="#lingua-del-file">Lingua del file</a></li>
-<li><a href="#importare-file-esterni">Importare file esterni</a></li>
-<li><a href="#commenti-html">Commenti HTML</a></li>
-<li><a href="#organizzare-le-regole-con-clauderules">Organizzare le regole con .claude/rules/</a><ul>
-<li><a href="#regole-con-scope-a-path-specifici">Regole con scope a path specifici</a></li>
-<li><a href="#regole-personali-globali">Regole personali globali</a></li>
-<li><a href="#symlink">Symlink</a></li>
-</ul>
-</li>
-<li><a href="#best-practice">Best practice</a></li>
-<li><a href="#cosa-includere">Cosa includere</a></li>
-<li><a href="#cosa-non-includere">Cosa NON includere</a></li>
-<li><a href="#generazione-iniziale">Generazione iniziale</a></li>
-<li><a href="#claudemd-e-compact">CLAUDE.md e /compact</a></li>
-<li><a href="#compatibilita-con-agentsmd">Compatibilità con AGENTS.md</a></li>
-<li><a href="#auto-memory">Auto Memory</a></li>
-</ul>
-</li>
-<li><a href="#prompting">Prompting</a><ul>
-<li><a href="#regole-base">Regole base</a></li>
-<li><a href="#struttura-delle-richieste">Struttura delle richieste</a></li>
-<li><a href="#auto-analisi-del-proprio-stile-di-prompting">Auto-analisi del proprio stile di prompting</a></li>
-</ul>
-</li>
-<li><a href="#claude-api-e-modelli">Claude API e Modelli</a><ul>
-<li><a href="#modelli-attuali-generazione-4x">Modelli attuali (generazione 4.x)</a></li>
-<li><a href="#casi-duso-consigliati">Casi d'uso consigliati</a><ul>
-<li><a href="#claude-opus-46-massima-intelligenza">Claude Opus 4.6 — Massima intelligenza</a></li>
-<li><a href="#claude-sonnet-46-miglior-rapporto-qualitacosto">Claude Sonnet 4.6 — Miglior rapporto qualità/costo</a></li>
-<li><a href="#claude-haiku-45-velocita-e-basso-costo">Claude Haiku 4.5 — Velocità e basso costo</a></li>
-</ul>
-</li>
-<li><a href="#funzionalita-per-modello">Funzionalità per modello</a></li>
-<li><a href="#modelli-legacy">Modelli legacy</a></li>
-<li><a href="#extended-thinking-ragionamento-esteso">Extended Thinking (Ragionamento esteso)</a><ul>
-<li><a href="#modalita-disponibili">Modalità disponibili</a></li>
-<li><a href="#visualizzazione-del-thinking">Visualizzazione del thinking</a></li>
-<li><a href="#quando-usarlo">Quando usarlo</a></li>
-<li><a href="#supporto-per-modello">Supporto per modello</a></li>
-</ul>
-</li>
-<li><a href="#note-pratiche">Note pratiche</a></li>
-</ul>
-</li>
-<li><a href="#mcp-model-context-protocol">MCP - Model Context Protocol</a><ul>
-<li><a href="#aggiungere-un-server-mcp">Aggiungere un server MCP</a></li>
-</ul>
-</li>
-<li><a href="#limiti-e-pricing">Limiti e Pricing</a><ul>
-<li><a href="#ottimizzazione-dei-token">Ottimizzazione dei token</a></li>
-</ul>
-</li>
-<li><a href="#tips-tricks">Tips &amp; Tricks</a><ul>
-<li><a href="#comandi-utili">Comandi utili</a></li>
-<li><a href="#ridurre-la-verbosita-delloutput">Ridurre la verbosità dell'output</a></li>
-<li><a href="#workflow-efficace-per-il-codice">Workflow efficace per il codice</a></li>
-</ul>
-</li>
-<li><a href="#link-utili">Link Utili</a></li>
-<li><a href="#stato-del-servizio">Stato del Servizio</a><ul>
-<li><a href="#servizi-monitorati">Servizi monitorati</a></li>
-<li><a href="#stati-possibili">Stati possibili</a></li>
-<li><a href="#storico-e-uptime">Storico e uptime</a></li>
-<li><a href="#notifiche">Notifiche</a></li>
-<li><a href="#quando-usarla">Quando usarla</a></li>
-</ul>
-</li>
-<li><a href="#plugin">Plugin</a><ul>
-<li><a href="#installazione-plugin">Installazione plugin</a></li>
-<li><a href="#plugin-documentati">Plugin documentati</a></li>
-</ul>
-</li>
-<li><a href="#analisi-claude-token-efficient">Analisi: claude-token-efficient</a><ul>
-<li><a href="#descrizione">Descrizione</a></li>
-<li><a href="#problema-affrontato">Problema affrontato</a></li>
-<li><a href="#soluzione-proposta-claudemd-universale">Soluzione proposta: CLAUDE.md universale</a></li>
-<li><a href="#benchmark">Benchmark</a></li>
-<li><a href="#profili-specializzati">Profili specializzati</a><ul>
-<li><a href="#profilo-coding-profilesclaudecodingmd">Profilo Coding (profiles/CLAUDE.coding.md)</a></li>
-<li><a href="#profilo-agents-profilesclaudeagentsmd">Profilo Agents (profiles/CLAUDE.agents.md)</a></li>
-<li><a href="#profilo-analysis-profilesclaudeanalysismd">Profilo Analysis (profiles/CLAUDE.analysis.md)</a></li>
-</ul>
-</li>
-<li><a href="#consigli-dalla-community">Consigli dalla community</a></li>
-<li><a href="#quando-usarlo-e-quando-no">Quando usarlo e quando no</a></li>
-<li><a href="#informazioni-integrate-nella-documentazione">Informazioni integrate nella documentazione</a></li>
-</ul>
-</li>
-<li><a href="#analisi-chiedi-allai-di-analizzare-come-le-parli">Analisi: Chiedi all'AI di analizzare come le parli</a><ul>
-<li><a href="#concetto-centrale">Concetto centrale</a></li>
-<li><a href="#perche-e-diverso-dal-prompt-engineering-classico">Perché è diverso dal prompt engineering classico</a></li>
-<li><a href="#il-metodo-passo-per-passo">Il metodo passo per passo</a><ul>
-<li><a href="#1-quando-fare-la-richiesta-di-analisi">1. Quando fare la richiesta di analisi</a></li>
-<li><a href="#2-come-formulare-la-richiesta">2. Come formulare la richiesta</a></li>
-<li><a href="#3-perche-chiedere-sia-punti-di-forza-che-debolezze">3. Perché chiedere sia punti di forza che debolezze</a></li>
-</ul>
-</li>
-<li><a href="#limitazioni-per-piattaforma">Limitazioni per piattaforma</a></li>
-<li><a href="#esempio-di-risultati">Esempio di risultati</a></li>
-<li><a href="#ripetibilita">Ripetibilità</a></li>
-<li><a href="#consigli-azionabili">Consigli azionabili</a></li>
-<li><a href="#informazioni-integrate-nella-documentazione_1">Informazioni integrate nella documentazione</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <div id="layout">
 
-  </nav>
-  <main>
-<h1 id="setup-claude-code">Setup Claude Code</h1>
-<h2 id="requisiti">Requisiti</h2>
-<ul>
-<li>Account Claude <strong>Pro</strong> ($20/mese), <strong>Max</strong> ($100-200/mese), oppure crediti API su Console</li>
-<li>Il piano gratuito di Claude.ai <strong>non</strong> include Claude Code</li>
-<li>Connessione internet attiva</li>
-<li>Shell: Bash, Zsh, PowerShell o CMD</li>
-</ul>
-<h2 id="installazione-metodo-consigliato-native-installer">Installazione - Metodo consigliato (Native Installer)</h2>
-<p>Non richiede Node.js. Si aggiorna automaticamente in background.</p>
-<p><strong>macOS / Linux:</strong></p>
-<pre><code class="language-bash">curl -fsSL https://claude.ai/install.sh | bash
-claude --version
-</code></pre>
-<p><strong>Windows (PowerShell):</strong></p>
-<pre><code class="language-powershell">irm https://claude.ai/install.sh | iex
-claude --version
-</code></pre>
-<blockquote>
-<p>Su Windows è necessario <strong>Git for Windows</strong>. Claude Code usa Git Bash internamente per eseguire comandi. Non serve avviare PowerShell come amministratore.</p>
-</blockquote>
-<h2 id="installazione-alternativa-npm">Installazione alternativa (npm)</h2>
-<p>Richiede Node.js 18+.</p>
-<pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
-claude --version
-</code></pre>
-<blockquote>
-<p><strong>MAI</strong> usare <code>sudo npm install -g</code> — causa problemi di permessi e sicurezza.</p>
-</blockquote>
-<h2 id="installazione-su-windows-con-wsl">Installazione su Windows con WSL</h2>
-<pre><code class="language-powershell"># PowerShell come Amministratore
-wsl --install -d Ubuntu
-</code></pre>
-<p>Dopo il riavvio, dentro il terminale Ubuntu:</p>
-<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt upgrade -y
-sudo apt install git -y
-curl -fsSL https://claude.ai/install.sh | bash
-claude --version
-</code></pre>
-<h2 id="autenticazione">Autenticazione</h2>
-<p>Al primo avvio, <code>claude</code> apre il browser per il login OAuth con il tuo account Claude (Pro/Max) o Console API.</p>
-<p>In alternativa puoi impostare la chiave API come variabile d'ambiente:</p>
-<pre><code class="language-bash">export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
-</code></pre>
-<h2 id="verifica-e-diagnostica">Verifica e diagnostica</h2>
-<pre><code class="language-bash">claude --version      # Verifica installazione
-claude doctor         # Diagnostica automatica dei problemi
-</code></pre>
-<h2 id="integrazione-con-vs-code">Integrazione con VS Code</h2>
-<p>Claude Code rileva automaticamente VS Code. In alternativa:
-1. Avvia Claude Code dal terminale integrato di VS Code
-2. Usa il comando <code>/ide</code> per abilitare l'integrazione</p>
-<p>Funziona anche con Cursor e altri editor moderni.</p>
-<h2 id="desktop-app">Desktop App</h2>
-<p>Esiste anche un'app desktop per usare Claude Code senza terminale, disponibile per macOS e Windows dalla documentazione ufficiale.</p>
-<hr />
-<p><a href="claude-md.md">Successivo: CLAUDE.md - Memoria di Progetto →</a></p>
-<hr />
-<h1 id="claudemd-memoria-di-progetto">CLAUDE.md - Memoria di Progetto</h1>
-<p>Il file <code>CLAUDE.md</code> fornisce a Claude contesto persistente tra sessioni. Viene letto automaticamente all'inizio di ogni sessione.</p>
-<h2 id="cose">Cos'è</h2>
-<p>Un file Markdown che fornisce a Claude contesto permanente: convenzioni, comandi, architettura, regole. Pensalo come un documento di onboarding per un collega che ogni giorno parte da zero.</p>
-<p><strong>Come funziona tecnicamente</strong>: il contenuto viene iniettato come <em>user message</em> dopo il system prompt, non come parte del system prompt. Claude lo legge e cerca di seguirlo, ma non è un enforcement garantito — istruzioni vaghe o in conflitto possono essere ignorate.</p>
-<h2 id="gerarchia-dei-file">Gerarchia dei file</h2>
-<p>I file vengono caricati dal più generico al più specifico (il più specifico ha priorità):</p>
-<table>
-<thead>
-<tr>
-<th>Scope</th>
-<th>Posizione</th>
-<th>Condiviso con</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Globale personale</td>
-<td><code>~/.claude/CLAUDE.md</code></td>
-<td>Solo te (tutti i progetti)</td>
-</tr>
-<tr>
-<td>Progetto</td>
-<td><code>./CLAUDE.md</code> oppure <code>./.claude/CLAUDE.md</code></td>
-<td>Team via version control</td>
-</tr>
-<tr>
-<td>Sotto-directory</td>
-<td><code>&lt;sottocartella&gt;/CLAUDE.md</code></td>
-<td>Team, caricato lazy</td>
-</tr>
-</tbody>
-</table>
-<p>I file nella gerarchia di directory sopra la working directory vengono caricati all'avvio. Quelli nelle sottodirectory vengono caricati on demand quando Claude legge file in quelle cartelle.</p>
-<blockquote>
-<p>Esiste anche un livello <strong>managed policy</strong> per organizzazioni (IT/DevOps centralizato), che non può essere escluso dagli utenti.</p>
-</blockquote>
-<h2 id="composizione-multi-livello">Composizione multi-livello</h2>
-<p>I file CLAUDE.md si compongono: Claude legge tutti i livelli simultaneamente. Questo permette di separare le preoccupazioni:</p>
-<ul>
-<li><strong>Globale</strong> (<code>~/.claude/CLAUDE.md</code>): preferenze personali (tono, formato, regole ASCII)</li>
-<li><strong>Progetto</strong> (<code>./CLAUDE.md</code> o <code>./.claude/CLAUDE.md</code>): standard condivisi col team</li>
-<li><strong>Sottodirectory</strong>: regole specifiche di area (es. <code>frontend/CLAUDE.md</code>, <code>api/CLAUDE.md</code>)</li>
-</ul>
-<p>Si possono anche creare <strong>profili specializzati</strong> per casi d'uso diversi (coding puro, automazione con agenti, analisi dati) con regole mirate per ciascuno.</p>
-<h2 id="lingua-del-file">Lingua del file</h2>
-<p>Claude interpreta il CLAUDE.md con la stessa precisione in qualsiasi lingua. Non c'è differenza tecnica tra scriverlo in italiano o in inglese.</p>
-<p>La scelta pratica:
-- <strong>Italiano</strong> (o la lingua del team): più leggibile per chi mantiene il file, coerente con il contesto di lavoro
-- <strong>Inglese</strong>: preferibile se il progetto è condiviso con persone non italofone o pubblicato open source</p>
-<h2 id="importare-file-esterni">Importare file esterni</h2>
-<p>Il CLAUDE.md supporta la sintassi <code>@path/to/file</code> per includere altri file, che vengono espansi nel contesto all'avvio:</p>
-<pre><code class="language-markdown">Vedi @README per la panoramica del progetto e @package.json per i comandi disponibili.
+    <aside id="sidebar">
+      <button id="sidebar-toggle" title="Nascondi indice">◀</button>
+      <div id="sidebar-body">
+        <ul>
+        <li><a href="#setup-claude-code" id="toc-setup-claude-code">Setup Claude Code</a>
+        <ul>
+        <li><a href="#requisiti" id="toc-requisiti">Requisiti</a></li>
+        <li><a href="#installazione---metodo-consigliato-native-installer" id="toc-installazione---metodo-consigliato-native-installer">Installazione
+        - Metodo consigliato (Native Installer)</a></li>
+        <li><a href="#installazione-alternativa-npm" id="toc-installazione-alternativa-npm">Installazione alternativa
+        (npm)</a></li>
+        <li><a href="#installazione-su-windows-con-wsl" id="toc-installazione-su-windows-con-wsl">Installazione su
+        Windows con WSL</a></li>
+        <li><a href="#autenticazione" id="toc-autenticazione">Autenticazione</a></li>
+        <li><a href="#verifica-e-diagnostica" id="toc-verifica-e-diagnostica">Verifica e diagnostica</a></li>
+        <li><a href="#integrazione-con-vs-code" id="toc-integrazione-con-vs-code">Integrazione con VS
+        Code</a></li>
+        <li><a href="#desktop-app" id="toc-desktop-app">Desktop
+        App</a></li>
+        </ul></li>
+        <li><a href="#claudemd---memoria-di-progetto" id="toc-claudemd---memoria-di-progetto">CLAUDE.md - Memoria di
+        Progetto</a>
+        <ul>
+        <li><a href="#cosè" id="toc-cosè">Cos&#39;è</a></li>
+        <li><a href="#gerarchia-dei-file" id="toc-gerarchia-dei-file">Gerarchia dei file</a></li>
+        <li><a href="#composizione-multi-livello" id="toc-composizione-multi-livello">Composizione
+        multi-livello</a></li>
+        <li><a href="#lingua-del-file" id="toc-lingua-del-file">Lingua
+        del file</a></li>
+        <li><a href="#importare-file-esterni" id="toc-importare-file-esterni">Importare file esterni</a></li>
+        <li><a href="#commenti-html" id="toc-commenti-html">Commenti
+        HTML</a></li>
+        <li><a href="#organizzare-le-regole-con-clauderules" id="toc-organizzare-le-regole-con-clauderules">Organizzare le
+        regole con <code>.claude/rules/</code></a>
+        <ul>
+        <li><a href="#regole-con-scope-a-path-specifici" id="toc-regole-con-scope-a-path-specifici">Regole con scope a
+        path specifici</a></li>
+        <li><a href="#regole-personali-globali" id="toc-regole-personali-globali">Regole personali
+        globali</a></li>
+        <li><a href="#symlink" id="toc-symlink">Symlink</a></li>
+        </ul></li>
+        <li><a href="#best-practice" id="toc-best-practice">Best
+        practice</a></li>
+        <li><a href="#cosa-includere" id="toc-cosa-includere">Cosa
+        includere</a></li>
+        <li><a href="#cosa-non-includere" id="toc-cosa-non-includere">Cosa NON includere</a></li>
+        <li><a href="#generazione-iniziale" id="toc-generazione-iniziale">Generazione iniziale</a></li>
+        <li><a href="#claudemd-e-compact" id="toc-claudemd-e-compact">CLAUDE.md e
+        <code>/compact</code></a></li>
+        <li><a href="#compatibilità-con-agentsmd" id="toc-compatibilità-con-agentsmd">Compatibilità con
+        AGENTS.md</a></li>
+        <li><a href="#auto-memory" id="toc-auto-memory">Auto
+        Memory</a></li>
+        </ul></li>
+        <li><a href="#prompting" id="toc-prompting">Prompting</a>
+        <ul>
+        <li><a href="#regole-base" id="toc-regole-base">Regole
+        base</a></li>
+        <li><a href="#struttura-delle-richieste" id="toc-struttura-delle-richieste">Struttura delle
+        richieste</a></li>
+        <li><a href="#auto-analisi-del-proprio-stile-di-prompting" id="toc-auto-analisi-del-proprio-stile-di-prompting">Auto-analisi
+        del proprio stile di prompting</a></li>
+        </ul></li>
+        <li><a href="#claude-api-e-modelli" id="toc-claude-api-e-modelli">Claude API e Modelli</a>
+        <ul>
+        <li><a href="#modelli-attuali-generazione-4x" id="toc-modelli-attuali-generazione-4x">Modelli attuali
+        (generazione 4.x)</a></li>
+        <li><a href="#casi-duso-consigliati" id="toc-casi-duso-consigliati">Casi d&#39;uso consigliati</a>
+        <ul>
+        <li><a href="#claude-opus-46--massima-intelligenza" id="toc-claude-opus-46--massima-intelligenza">Claude Opus 4.6 —
+        Massima intelligenza</a></li>
+        <li><a href="#claude-sonnet-46--miglior-rapporto-qualitàcosto" id="toc-claude-sonnet-46--miglior-rapporto-qualitàcosto">Claude
+        Sonnet 4.6 — Miglior rapporto qualità/costo</a></li>
+        <li><a href="#claude-haiku-45--velocità-e-basso-costo" id="toc-claude-haiku-45--velocità-e-basso-costo">Claude Haiku
+        4.5 — Velocità e basso costo</a></li>
+        </ul></li>
+        <li><a href="#funzionalità-per-modello" id="toc-funzionalità-per-modello">Funzionalità per
+        modello</a></li>
+        <li><a href="#modelli-legacy" id="toc-modelli-legacy">Modelli
+        legacy</a></li>
+        <li><a href="#extended-thinking-ragionamento-esteso" id="toc-extended-thinking-ragionamento-esteso">Extended Thinking
+        (Ragionamento esteso)</a>
+        <ul>
+        <li><a href="#modalità-disponibili" id="toc-modalità-disponibili">Modalità disponibili</a></li>
+        <li><a href="#visualizzazione-del-thinking" id="toc-visualizzazione-del-thinking">Visualizzazione del
+        thinking</a></li>
+        <li><a href="#quando-usarlo" id="toc-quando-usarlo">Quando
+        usarlo</a></li>
+        <li><a href="#supporto-per-modello" id="toc-supporto-per-modello">Supporto per modello</a></li>
+        </ul></li>
+        <li><a href="#note-pratiche" id="toc-note-pratiche">Note
+        pratiche</a></li>
+        </ul></li>
+        <li><a href="#mcp---model-context-protocol" id="toc-mcp---model-context-protocol">MCP - Model Context
+        Protocol</a>
+        <ul>
+        <li><a href="#aggiungere-un-server-mcp" id="toc-aggiungere-un-server-mcp">Aggiungere un server
+        MCP</a></li>
+        </ul></li>
+        <li><a href="#limiti-e-pricing" id="toc-limiti-e-pricing">Limiti
+        e Pricing</a>
+        <ul>
+        <li><a href="#ottimizzazione-dei-token" id="toc-ottimizzazione-dei-token">Ottimizzazione dei
+        token</a></li>
+        </ul></li>
+        <li><a href="#tips--tricks" id="toc-tips--tricks">Tips &amp;
+        Tricks</a>
+        <ul>
+        <li><a href="#comandi-utili" id="toc-comandi-utili">Comandi
+        utili</a></li>
+        <li><a href="#ridurre-la-verbosità-delloutput" id="toc-ridurre-la-verbosità-delloutput">Ridurre la verbosità
+        dell&#39;output</a></li>
+        <li><a href="#workflow-efficace-per-il-codice" id="toc-workflow-efficace-per-il-codice">Workflow efficace per
+        il codice</a></li>
+        </ul></li>
+        <li><a href="#link-utili" id="toc-link-utili">Link
+        Utili</a></li>
+        <li><a href="#stato-del-servizio" id="toc-stato-del-servizio">Stato del Servizio</a>
+        <ul>
+        <li><a href="#servizi-monitorati" id="toc-servizi-monitorati">Servizi monitorati</a></li>
+        <li><a href="#stati-possibili" id="toc-stati-possibili">Stati
+        possibili</a></li>
+        <li><a href="#storico-e-uptime" id="toc-storico-e-uptime">Storico e uptime</a></li>
+        <li><a href="#notifiche" id="toc-notifiche">Notifiche</a></li>
+        <li><a href="#quando-usarla" id="toc-quando-usarla">Quando
+        usarla</a></li>
+        </ul></li>
+        <li><a href="#plugin" id="toc-plugin">Plugin</a>
+        <ul>
+        <li><a href="#installazione-plugin" id="toc-installazione-plugin">Installazione plugin</a></li>
+        <li><a href="#plugin-documentati" id="toc-plugin-documentati">Plugin documentati</a></li>
+        </ul></li>
+        <li><a href="#claude-hud" id="toc-claude-hud">Claude HUD</a>
+        <ul>
+        <li><a href="#cosè-1" id="toc-cosè-1">Cos&#39;è</a></li>
+        <li><a href="#installazione" id="toc-installazione">Installazione</a></li>
+        <li><a href="#requisiti-1" id="toc-requisiti-1">Requisiti</a></li>
+        <li><a href="#cosa-mostra" id="toc-cosa-mostra">Cosa mostra</a>
+        <ul>
+        <li><a href="#layout-predefinito-2-righe" id="toc-layout-predefinito-2-righe">Layout predefinito (2
+        righe)</a></li>
+        <li><a href="#linee-opzionali-disabilitate-di-default" id="toc-linee-opzionali-disabilitate-di-default">Linee opzionali
+        (disabilitate di default)</a></li>
+        </ul></li>
+        <li><a href="#configurazione" id="toc-configurazione">Configurazione</a>
+        <ul>
+        <li><a href="#configurazione-guidata" id="toc-configurazione-guidata">Configurazione guidata</a></li>
+        <li><a href="#preset-disponibili" id="toc-preset-disponibili">Preset disponibili</a></li>
+        <li><a href="#opzioni-principali" id="toc-opzioni-principali">Opzioni principali</a></li>
+        </ul></li>
+        <li><a href="#note-e-limitazioni" id="toc-note-e-limitazioni">Note e limitazioni</a></li>
+        </ul></li>
+        <li><a href="#claude-mem" id="toc-claude-mem">Claude-Mem</a>
+        <ul>
+        <li><a href="#cosè-2" id="toc-cosè-2">Cos&#39;è</a></li>
+        <li><a href="#installazione-1" id="toc-installazione-1">Installazione</a></li>
+        <li><a href="#requisiti-2" id="toc-requisiti-2">Requisiti</a></li>
+        <li><a href="#come-funziona" id="toc-come-funziona">Come
+        funziona</a>
+        <ul>
+        <li><a href="#lifecycle-hooks" id="toc-lifecycle-hooks">Lifecycle hooks</a></li>
+        <li><a href="#worker-service" id="toc-worker-service">Worker
+        service</a></li>
+        <li><a href="#ricerca-a-3-livelli-token-efficiente" id="toc-ricerca-a-3-livelli-token-efficiente">Ricerca a 3
+        livelli (token-efficiente)</a></li>
+        </ul></li>
+        <li><a href="#funzionalità-principali" id="toc-funzionalità-principali">Funzionalità
+        principali</a></li>
+        <li><a href="#risorse" id="toc-risorse">Risorse</a></li>
+        </ul></li>
+        <li><a href="#superpowers" id="toc-superpowers">Superpowers</a>
+        <ul>
+        <li><a href="#cosè-3" id="toc-cosè-3">Cos&#39;è</a></li>
+        <li><a href="#installazione-2" id="toc-installazione-2">Installazione</a></li>
+        <li><a href="#come-funziona-1" id="toc-come-funziona-1">Come
+        funziona</a></li>
+        <li><a href="#skill-disponibili" id="toc-skill-disponibili">Skill disponibili</a>
+        <ul>
+        <li><a href="#testing" id="toc-testing">Testing</a></li>
+        <li><a href="#debugging" id="toc-debugging">Debugging</a></li>
+        <li><a href="#collaborazione-e-pianificazione" id="toc-collaborazione-e-pianificazione">Collaborazione e
+        pianificazione</a></li>
+        <li><a href="#git-workflow" id="toc-git-workflow">Git
+        workflow</a></li>
+        <li><a href="#meta" id="toc-meta">Meta</a></li>
+        </ul></li>
+        <li><a href="#principi-guida" id="toc-principi-guida">Principi
+        guida</a></li>
+        <li><a href="#risorse-1" id="toc-risorse-1">Risorse</a></li>
+        </ul></li>
+        </ul>
+      </div>
+    </aside>
 
-# Istruzioni aggiuntive
-- Git workflow: @docs/git-instructions.md
-</code></pre>
-<p>Utile anche per preferenze personali non committate:</p>
-<pre><code class="language-markdown"># Preferenze personali
-@~/.claude/my-project-instructions.md
-</code></pre>
-<p>La prima volta che Claude Code incontra import esterni mostra un dialog di approvazione.</p>
-<h2 id="commenti-html">Commenti HTML</h2>
-<p>I commenti <code>&lt;!-- ... --&gt;</code> vengono rimossi prima dell'iniezione nel contesto. Utili per lasciare note ai maintainer senza consumare token:</p>
-<pre><code class="language-markdown">&lt;!-- TODO: aggiornare questa sezione dopo la migrazione a v2 --&gt;
-## Comandi
-- `npm run build`
-</code></pre>
-<p>I commenti dentro i code block vengono preservati.</p>
-<h2 id="organizzare-le-regole-con-clauderules">Organizzare le regole con <code>.claude/rules/</code></h2>
-<p>Per progetti grandi, le istruzioni possono essere suddivise in file separati sotto <code>.claude/rules/</code>. Ogni file dovrebbe coprire un solo argomento:</p>
-<pre><code>progetto/
+    <main id="content">
+      <header id="doc-header">
+        <h1 id="doc-title">Claude Code - Knowledge Base</h1>
+        <p id="doc-subtitle">Documentazione personale sull&#39;uso di Claude Code</p>
+      </header>
+      <h1 id="setup-claude-code">Setup Claude Code</h1>
+      <h2 id="requisiti">Requisiti</h2>
+      <ul>
+      <li>Account Claude <strong>Pro</strong> (<span class="math inline">20/<em>m</em><em>e</em><em>s</em><em>e</em>), * * <em>M</em><em>a</em><em>x</em> * *(</span>100-200/mese),
+      oppure crediti API su Console</li>
+      <li>Il piano gratuito di Claude.ai <strong>non</strong> include
+      Claude Code</li>
+      <li>Connessione internet attiva</li>
+      <li>Shell: Bash, Zsh, PowerShell o CMD</li>
+      </ul>
+      <h2 id="installazione---metodo-consigliato-native-installer">Installazione
+      - Metodo consigliato (Native Installer)</h2>
+      <p>Non richiede Node.js. Si aggiorna automaticamente in
+      background.</p>
+      <p><strong>macOS / Linux:</strong></p>
+      <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://claude.ai/install.sh <span class="kw">|</span> <span class="fu">bash</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--version</span></span></code></pre></div>
+      <p><strong>Windows (PowerShell):</strong></p>
+      <div class="sourceCode" id="cb2"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">irm</span> https<span class="op">://</span>claude<span class="op">.</span><span class="fu">ai</span><span class="op">/</span>install<span class="op">.</span><span class="fu">sh</span> <span class="op">|</span> <span class="fu">iex</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>claude <span class="op">--</span>version</span></code></pre></div>
+      <blockquote>
+      <p>Su Windows è necessario <strong>Git for Windows</strong>.
+      Claude Code usa Git Bash internamente per eseguire comandi. Non
+      serve avviare PowerShell come amministratore.</p>
+      </blockquote>
+      <h2 id="installazione-alternativa-npm">Installazione alternativa
+      (npm)</h2>
+      <p>Richiede Node.js 18+.</p>
+      <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> @anthropic-ai/claude-code</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--version</span></span></code></pre></div>
+      <blockquote>
+      <p><strong>MAI</strong> usare <code>sudo npm install -g</code> —
+      causa problemi di permessi e sicurezza.</p>
+      </blockquote>
+      <h2 id="installazione-su-windows-con-wsl">Installazione su Windows
+      con WSL</h2>
+      <div class="sourceCode" id="cb4"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PowerShell come Amministratore</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>install <span class="op">-</span>d Ubuntu</span></code></pre></div>
+      <p>Dopo il riavvio, dentro il terminale Ubuntu:</p>
+      <div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install git <span class="at">-y</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://claude.ai/install.sh <span class="kw">|</span> <span class="fu">bash</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--version</span></span></code></pre></div>
+      <h2 id="autenticazione">Autenticazione</h2>
+      <p>Al primo avvio, <code>claude</code> apre il browser per il
+      login OAuth con il tuo account Claude (Pro/Max) o Console API.</p>
+      <p>In alternativa puoi impostare la chiave API come variabile
+      d&#39;ambiente:</p>
+      <div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-ant-...&quot;</span></span></code></pre></div>
+      <h2 id="verifica-e-diagnostica">Verifica e diagnostica</h2>
+      <div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--version</span>      <span class="co"># Verifica installazione</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> doctor         <span class="co"># Diagnostica automatica dei problemi</span></span></code></pre></div>
+      <h2 id="integrazione-con-vs-code">Integrazione con VS Code</h2>
+      <p>Claude Code rileva automaticamente VS Code. In alternativa:</p>
+      <ol type="1">
+      <li>Avvia Claude Code dal terminale integrato di VS Code</li>
+      <li>Usa il comando <code>/ide</code> per abilitare
+      l&#39;integrazione</li>
+      </ol>
+      <p>Funziona anche con Cursor e altri editor moderni.</p>
+      <h2 id="desktop-app">Desktop App</h2>
+      <p>Esiste anche un&#39;app desktop per usare Claude Code senza
+      terminale, disponibile per macOS e Windows dalla documentazione
+      ufficiale.</p>
+      <hr />
+      <p><a href="claude-md.md">Successivo: CLAUDE.md - Memoria di
+      Progetto →</a></p>
+      <hr />
+      <h1 id="claudemd---memoria-di-progetto">CLAUDE.md - Memoria di
+      Progetto</h1>
+      <p>Il file <code>CLAUDE.md</code> fornisce a Claude contesto
+      persistente tra sessioni. Viene letto automaticamente all&#39;inizio
+      di ogni sessione.</p>
+      <h2 id="cosè">Cos&#39;è</h2>
+      <p>Un file Markdown che fornisce a Claude contesto permanente:
+      convenzioni, comandi, architettura, regole. Pensalo come un
+      documento di onboarding per un collega che ogni giorno parte da
+      zero.</p>
+      <p><strong>Come funziona tecnicamente</strong>: il contenuto viene
+      iniettato come <em>user message</em> dopo il system prompt, non
+      come parte del system prompt. Claude lo legge e cerca di seguirlo,
+      ma non è un enforcement garantito — istruzioni vaghe o in
+      conflitto possono essere ignorate.</p>
+      <h2 id="gerarchia-dei-file">Gerarchia dei file</h2>
+      <p>I file vengono caricati dal più generico al più specifico (il
+      più specifico ha priorità):</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Scope</th>
+      <th>Posizione</th>
+      <th>Condiviso con</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Globale personale</td>
+      <td><code>~/.claude/CLAUDE.md</code></td>
+      <td>Solo te (tutti i progetti)</td>
+      </tr>
+      <tr>
+      <td>Progetto</td>
+      <td><code>./CLAUDE.md</code> oppure
+      <code>./.claude/CLAUDE.md</code></td>
+      <td>Team via version control</td>
+      </tr>
+      <tr>
+      <td>Sotto-directory</td>
+      <td><code>&lt;sottocartella&gt;/CLAUDE.md</code></td>
+      <td>Team, caricato lazy</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>I file nella gerarchia di directory sopra la working directory
+      vengono caricati all&#39;avvio. Quelli nelle sottodirectory vengono
+      caricati on demand quando Claude legge file in quelle
+      cartelle.</p>
+      <blockquote>
+      <p>Esiste anche un livello <strong>managed policy</strong> per
+      organizzazioni (IT/DevOps centralizato), che non può essere
+      escluso dagli utenti.</p>
+      </blockquote>
+      <h2 id="composizione-multi-livello">Composizione
+      multi-livello</h2>
+      <p>I file CLAUDE.md si compongono: Claude legge tutti i livelli
+      simultaneamente. Questo permette di separare le
+      preoccupazioni:</p>
+      <ul>
+      <li><strong>Globale</strong> (<code>~/.claude/CLAUDE.md</code>):
+      preferenze personali (tono, formato, regole ASCII)</li>
+      <li><strong>Progetto</strong> (<code>./CLAUDE.md</code> o
+      <code>./.claude/CLAUDE.md</code>): standard condivisi col
+      team</li>
+      <li><strong>Sottodirectory</strong>: regole specifiche di area
+      (es. <code>frontend/CLAUDE.md</code>,
+      <code>api/CLAUDE.md</code>)</li>
+      </ul>
+      <p>Si possono anche creare <strong>profili specializzati</strong>
+      per casi d&#39;uso diversi (coding puro, automazione con agenti,
+      analisi dati) con regole mirate per ciascuno.</p>
+      <h2 id="lingua-del-file">Lingua del file</h2>
+      <p>Claude interpreta il CLAUDE.md con la stessa precisione in
+      qualsiasi lingua. Non c&#39;è differenza tecnica tra scriverlo in
+      italiano o in inglese.</p>
+      <p>La scelta pratica:</p>
+      <ul>
+      <li><strong>Italiano</strong> (o la lingua del team): più
+      leggibile per chi mantiene il file, coerente con il contesto di
+      lavoro</li>
+      <li><strong>Inglese</strong>: preferibile se il progetto è
+      condiviso con persone non italofone o pubblicato open source</li>
+      </ul>
+      <h2 id="importare-file-esterni">Importare file esterni</h2>
+      <p>Il CLAUDE.md supporta la sintassi <code>@path/to/file</code>
+      per includere altri file, che vengono espansi nel contesto
+      all&#39;avvio:</p>
+      <div class="sourceCode" id="cb8"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Vedi @README per la panoramica del progetto e @package.json per i comandi disponibili.</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu"># Istruzioni aggiuntive</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Git workflow: @docs/git-instructions.md</span></code></pre></div>
+      <p>Utile anche per preferenze personali non committate:</p>
+      <div class="sourceCode" id="cb9"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Preferenze personali</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>@~/.claude/my-project-instructions.md</span></code></pre></div>
+      <p>La prima volta che Claude Code incontra import esterni mostra
+      un dialog di approvazione.</p>
+      <h2 id="commenti-html">Commenti HTML</h2>
+      <p>I commenti <code>&lt;!-- ... --&gt;</code> vengono rimossi
+      prima dell&#39;iniezione nel contesto. Utili per lasciare note ai
+      maintainer senza consumare token:</p>
+      <div class="sourceCode" id="cb10"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- </span><span class="al">TODO</span><span class="co">: aggiornare questa sezione dopo la migrazione a v2 --&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">## Comandi</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`npm run build`</span></span></code></pre></div>
+      <p>I commenti dentro i code block vengono preservati.</p>
+      <h2 id="organizzare-le-regole-con-clauderules">Organizzare le
+      regole con <code>.claude/rules/</code></h2>
+      <p>Per progetti grandi, le istruzioni possono essere suddivise in
+      file separati sotto <code>.claude/rules/</code>. Ogni file
+      dovrebbe coprire un solo argomento:</p>
+      <pre><code>progetto/
 ├── .claude/
 │   ├── CLAUDE.md
 │   └── rules/
 │       ├── code-style.md
 │       ├── testing.md
-│       └── security.md
-</code></pre>
-<h3 id="regole-con-scope-a-path-specifici">Regole con scope a path specifici</h3>
-<p>Le regole possono essere limitate a determinati file tramite frontmatter YAML:</p>
-<pre><code class="language-markdown">---
-paths:
-  - &quot;src/api/**/*.ts&quot;
----
-
-# Regole API
-- Tutti gli endpoint devono includere validazione dell'input
-- Usa il formato standard di risposta per gli errori
-</code></pre>
-<p>Pattern supportati: <code>**/*.ts</code>, <code>src/**/*</code>, <code>*.md</code>, ecc. Le regole senza <code>paths</code> si applicano sempre.</p>
-<h3 id="regole-personali-globali">Regole personali globali</h3>
-<p>Le regole in <code>~/.claude/rules/</code> si applicano a tutti i progetti sulla propria macchina.</p>
-<h3 id="symlink">Symlink</h3>
-<p>La directory <code>.claude/rules/</code> supporta symlink — utile per condividere regole tra più progetti.</p>
-<h2 id="best-practice">Best practice</h2>
-<ul>
-<li><strong>Max ~200 righe</strong> per file. File troppo lunghi consumano contesto e riducono l'aderenza alle istruzioni</li>
-<li><strong>Non duplicare</strong> ciò che Claude può inferire dal codice (es. "questo è un progetto TypeScript" con un <code>package.json</code> presente)</li>
-<li><strong>Istruzioni specifiche e verificabili</strong>, non vaghe ("segui le best practice")</li>
-<li>Esempio: invece di "sii conciso", meglio "quando uno step fallisce, fermati immediatamente e riporta l'errore completo con traceback prima di tentare qualsiasi fix"</li>
-<li>Usa <strong>header e bullet point</strong> per strutturare — Claude legge la struttura come un lettore umano</li>
-<li>Metti in <code>CLAUDE.md</code> solo ciò che serve in <strong>ogni sessione</strong></li>
-<li>Per documentazione ad-hoc, usa <code>docs/</code> e referenzia con <code>@docs/filename.md</code></li>
-<li>Se il file cresce troppo, spezza le istruzioni in file separati sotto <code>.claude/rules/</code></li>
-<li>Controlla periodicamente conflitti tra file CLAUDE.md di livelli diversi</li>
-</ul>
-<h2 id="cosa-includere">Cosa includere</h2>
-<ul>
-<li>Descrizione breve del progetto (pochi bullet)</li>
-<li>Comandi di build, test, lint usati di frequente</li>
-<li>Convenzioni di naming e struttura cartelle</li>
-<li>Regole immutabili ("MAI fare X", "USA SEMPRE Y")</li>
-<li>Terminologia specifica del progetto</li>
-<li>Principi di ingegneria (es. SOLID)</li>
-<li>Cose che Claude tende a sbagliare (sezione "Gotchas")</li>
-</ul>
-<h2 id="cosa-non-includere">Cosa NON includere</h2>
-<ul>
-<li>Informazioni che cambiano spesso (mettile nei prompt)</li>
-<li>Dati sensibili (il file viene spesso committato su git)</li>
-<li>Cose ovvie che Claude può capire dal codice</li>
-<li>Descrizioni dettagliate dell'architettura (meglio un link a <code>docs/architecture.md</code>)</li>
-</ul>
-<h2 id="generazione-iniziale">Generazione iniziale</h2>
-<pre><code class="language-bash"># Claude Code genera un CLAUDE.md di partenza basato sulla struttura del progetto
-claude /init
-</code></pre>
-<blockquote>
-<p>Consiglio: dopo <code>/init</code>, <strong>elimina</strong> la maggior parte del contenuto generato. Tieni solo ciò che aggiunge valore reale.</p>
-</blockquote>
-<p>Con <code>CLAUDE_CODE_NEW_INIT=true</code> si attiva una modalità interattiva che guida passo passo nella creazione (esplora il codice, fa domande, propone il file prima di scriverlo).</p>
-<h2 id="claudemd-e-compact">CLAUDE.md e <code>/compact</code></h2>
-<p>Il CLAUDE.md <strong>sopravvive alla compattazione</strong>: dopo <code>/compact</code>, Claude ricarica il file da disco e lo reinietta nel contesto. Se un'istruzione sembra sparire dopo <code>/compact</code>, significa che era stata data solo nella conversazione, non scritta nel file.</p>
-<h2 id="compatibilita-con-agentsmd">Compatibilità con AGENTS.md</h2>
-<p>Se il repo usa già <code>AGENTS.md</code> per altri agenti AI, creare un <code>CLAUDE.md</code> che lo importa per non duplicare le istruzioni:</p>
-<pre><code class="language-markdown">@AGENTS.md
-
-## Claude Code
-- Usa plan mode per modifiche in `src/billing/`.
-</code></pre>
-<h2 id="auto-memory">Auto Memory</h2>
-<p>Da Claude Code v2.1.59+, Claude può accumulare conoscenza automaticamente tra le sessioni.</p>
-<p><strong>Storage</strong>: <code>~/.claude/projects/&lt;project&gt;/memory/</code></p>
-<pre><code>memory/
+│       └── security.md</code></pre>
+      <h3 id="regole-con-scope-a-path-specifici">Regole con scope a path
+      specifici</h3>
+      <p>Le regole possono essere limitate a determinati file tramite
+      frontmatter YAML:</p>
+      <div class="sourceCode" id="cb12"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="an">paths:</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">  - &quot;src/api/**/*.ts&quot;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu"># Regole API</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Tutti gli endpoint devono includere validazione dell&#39;input</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Usa il formato standard di risposta per gli errori</span></code></pre></div>
+      <p>Pattern supportati: <code>**/*.ts</code>,
+      <code>src/**/*</code>, <code>*.md</code>, ecc. Le regole senza
+      <code>paths</code> si applicano sempre.</p>
+      <h3 id="regole-personali-globali">Regole personali globali</h3>
+      <p>Le regole in <code>~/.claude/rules/</code> si applicano a tutti
+      i progetti sulla propria macchina.</p>
+      <h3 id="symlink">Symlink</h3>
+      <p>La directory <code>.claude/rules/</code> supporta symlink —
+      utile per condividere regole tra più progetti.</p>
+      <h2 id="best-practice">Best practice</h2>
+      <ul>
+      <li><strong>Max ~200 righe</strong> per file. File troppo lunghi
+      consumano contesto e riducono l&#39;aderenza alle istruzioni</li>
+      <li><strong>Non duplicare</strong> ciò che Claude può inferire dal
+      codice (es. &quot;questo è un progetto TypeScript&quot; con un
+      <code>package.json</code> presente)</li>
+      <li><strong>Istruzioni specifiche e verificabili</strong>, non
+      vaghe (&quot;segui le best practice&quot;)
+      <ul>
+      <li>Esempio: invece di &quot;sii conciso&quot;, meglio &quot;quando uno step
+      fallisce, fermati immediatamente e riporta l&#39;errore completo con
+      traceback prima di tentare qualsiasi fix&quot;</li>
+      </ul></li>
+      <li>Usa <strong>header e bullet point</strong> per strutturare —
+      Claude legge la struttura come un lettore umano</li>
+      <li>Metti in <code>CLAUDE.md</code> solo ciò che serve in
+      <strong>ogni sessione</strong></li>
+      <li>Per documentazione ad-hoc, usa <code>docs/</code> e referenzia
+      con <code>@docs/filename.md</code></li>
+      <li>Se il file cresce troppo, spezza le istruzioni in file
+      separati sotto <code>.claude/rules/</code></li>
+      <li>Controlla periodicamente conflitti tra file CLAUDE.md di
+      livelli diversi</li>
+      </ul>
+      <h2 id="cosa-includere">Cosa includere</h2>
+      <ul>
+      <li>Descrizione breve del progetto (pochi bullet)</li>
+      <li>Comandi di build, test, lint usati di frequente</li>
+      <li>Convenzioni di naming e struttura cartelle</li>
+      <li>Regole immutabili (&quot;MAI fare X&quot;, &quot;USA SEMPRE Y&quot;)</li>
+      <li>Terminologia specifica del progetto</li>
+      <li>Principi di ingegneria (es. SOLID)</li>
+      <li>Cose che Claude tende a sbagliare (sezione &quot;Gotchas&quot;)</li>
+      </ul>
+      <h2 id="cosa-non-includere">Cosa NON includere</h2>
+      <ul>
+      <li>Informazioni che cambiano spesso (mettile nei prompt)</li>
+      <li>Dati sensibili (il file viene spesso committato su git)</li>
+      <li>Cose ovvie che Claude può capire dal codice</li>
+      <li>Descrizioni dettagliate dell&#39;architettura (meglio un link a
+      <code>docs/architecture.md</code>)</li>
+      </ul>
+      <h2 id="generazione-iniziale">Generazione iniziale</h2>
+      <div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Claude Code genera un CLAUDE.md di partenza basato sulla struttura del progetto</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> /init</span></code></pre></div>
+      <blockquote>
+      <p>Consiglio: dopo <code>/init</code>, <strong>elimina</strong> la
+      maggior parte del contenuto generato. Tieni solo ciò che aggiunge
+      valore reale.</p>
+      </blockquote>
+      <p>Con <code>CLAUDE_CODE_NEW_INIT=true</code> si attiva una
+      modalità interattiva che guida passo passo nella creazione
+      (esplora il codice, fa domande, propone il file prima di
+      scriverlo).</p>
+      <h2 id="claudemd-e-compact">CLAUDE.md e <code>/compact</code></h2>
+      <p>Il CLAUDE.md <strong>sopravvive alla compattazione</strong>:
+      dopo <code>/compact</code>, Claude ricarica il file da disco e lo
+      reinietta nel contesto. Se un&#39;istruzione sembra sparire dopo
+      <code>/compact</code>, significa che era stata data solo nella
+      conversazione, non scritta nel file.</p>
+      <h2 id="compatibilità-con-agentsmd">Compatibilità con
+      AGENTS.md</h2>
+      <p>Se il repo usa già <code>AGENTS.md</code> per altri agenti AI,
+      creare un <code>CLAUDE.md</code> che lo importa per non duplicare
+      le istruzioni:</p>
+      <div class="sourceCode" id="cb14"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>@AGENTS.md</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Claude Code</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Usa plan mode per modifiche in <span class="in">`src/billing/`</span>.</span></code></pre></div>
+      <h2 id="auto-memory">Auto Memory</h2>
+      <p>Da Claude Code v2.1.59+, Claude può accumulare conoscenza
+      automaticamente tra le sessioni.</p>
+      <p><strong>Storage</strong>:
+      <code>~/.claude/projects/&lt;project&gt;/memory/</code></p>
+      <pre><code>memory/
 ├── MEMORY.md          # Indice conciso, caricato ad ogni sessione
 ├── debugging.md       # Note sui pattern di debug
-├── api-conventions.md # Decisioni di design API
-</code></pre>
-<p><strong>Limiti di caricamento</strong>:
-- <code>MEMORY.md</code>: prime 200 righe o 25KB — il resto non viene caricato all'avvio
-- I file topic (es. <code>debugging.md</code>) non vengono caricati all'avvio — Claude li legge on demand</p>
-<p><strong>Gestione</strong>: usa <code>/memory</code> per sfogliare, modificare o eliminare i file di memoria. I file sono plain markdown editabili manualmente.</p>
-<p><strong>Disabilitare</strong>: imposta <code>autoMemoryEnabled: false</code> nelle impostazioni o la variabile d'ambiente <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY=1</code>.</p>
-<hr />
-<h1 id="prompting">Prompting</h1>
-<p>Best practice per scrivere prompt efficaci con Claude.</p>
-<h2 id="regole-base">Regole base</h2>
-<ul>
-<li>Essere chiari e dettagliati nella richiesta</li>
-<li>Usare esempi positivi e negativi</li>
-<li>Incoraggiare il ragionamento step-by-step</li>
-<li>Richiedere tag XML specifici per strutturare l'output</li>
-<li>Specificare lunghezza e formato desiderati</li>
-</ul>
-<p>Guida completa: https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview</p>
-<h2 id="struttura-delle-richieste">Struttura delle richieste</h2>
-<ul>
-<li><strong>Contesto e vincoli prima, richiesta operativa dopo</strong>: fornire sempre il contesto necessario <em>prima</em> di chiedere l'azione. Se si danno vincoli dopo, Claude potrebbe aver già imboccato una strada sbagliata</li>
-<li><strong>Una richiesta per messaggio</strong>: evitare di comprimere più richieste non correlate in un singolo messaggio. Ogni richiesta separata ottiene risposte più precise</li>
-<li><strong>Riportare risultati esatti</strong>: quando si testa qualcosa e si chiede aiuto, includere log, errori e screenshot concreti anziché descrizioni vaghe</li>
-<li><strong>Mettere in discussione le proposte</strong>: non accettare passivamente — ragionare sulla proposta e obiettare se qualcosa non convince</li>
-</ul>
-<h2 id="auto-analisi-del-proprio-stile-di-prompting">Auto-analisi del proprio stile di prompting</h2>
-<p>Un metodo efficace per migliorare è chiedere all'AI di <strong>analizzare le proprie conversazioni</strong> alla fine di sessioni di lavoro sostanziali:</p>
-<blockquote>
-<p><em>"Analizza come faccio le richieste in questa conversazione, evidenziando sia i punti efficaci che quelli deboli."</em></p>
-</blockquote>
-<p><strong>Quando funziona meglio</strong>: dopo sessioni collaborative complesse (costruzione di codice, documenti, progetti) con errori, correzioni e cambi di direzione — non dopo semplici Q&amp;A.</p>
-<p><strong>Piattaforma ideale</strong>: Claude Code con Opus (1M token di contesto) permette di analizzare sessioni molto lunghe.</p>
-<p><strong>Ripetere periodicamente</strong>: rifare l'analisi a distanza di settimane per monitorare l'evoluzione dei propri pattern comunicativi.</p>
-<blockquote>
-<p>È importante chiedere sia punti di forza che debolezze: chiedere solo i punti di forza genera elogi generici, solo le debolezze produce critiche decontestualizzate.</p>
-</blockquote>
-<hr />
-<h1 id="claude-api-e-modelli">Claude API e Modelli</h1>
-<h2 id="modelli-attuali-generazione-4x">Modelli attuali (generazione 4.x)</h2>
-<table>
-<thead>
-<tr>
-<th>Modello</th>
-<th>ID API</th>
-<th>Contesto</th>
-<th>Output max</th>
-<th>Prezzo (input/output per MTok)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Claude Opus 4.6</td>
-<td><code>claude-opus-4-6</code></td>
-<td>1M token</td>
-<td>128k</td>
-<td>$5 / $25</td>
-</tr>
-<tr>
-<td>Claude Sonnet 4.6</td>
-<td><code>claude-sonnet-4-6</code></td>
-<td>1M token</td>
-<td>64k</td>
-<td>$3 / $15</td>
-</tr>
-<tr>
-<td>Claude Haiku 4.5</td>
-<td><code>claude-haiku-4-5-20251001</code></td>
-<td>200k token</td>
-<td>64k</td>
-<td>$1 / $5</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>Knowledge cutoff: Opus 4.6 → mag 2025, Sonnet 4.6 → ago 2025, Haiku 4.5 → feb 2025</p>
-</blockquote>
-<hr />
-<h2 id="casi-duso-consigliati">Casi d'uso consigliati</h2>
-<h3 id="claude-opus-46-massima-intelligenza">Claude Opus 4.6 — Massima intelligenza</h3>
-<p>Il modello più capace. Da usare quando la qualità del risultato conta più del costo o della velocità.</p>
-<ul>
-<li>Ragionamento multi-step complesso (matematica, logica, strategia)</li>
-<li>Analisi approfondita di documenti lunghi (fino a 1M token di contesto)</li>
-<li>Scrittura creativa di alta qualità</li>
-<li>Ricerca e sintesi su argomenti tecnici complessi</li>
-<li>Agentic tasks con pianificazione autonoma e uso di strumenti</li>
-<li>Coding su codebase grandi con molte dipendenze da tenere a mente</li>
-<li>Revisione critica di architetture e decisioni di design</li>
-</ul>
-<p><strong>Quando NON usarlo</strong>: task semplici e ripetitivi, elaborazioni in batch ad alto volume, applicazioni real-time dove la latenza è critica.</p>
-<hr />
-<h3 id="claude-sonnet-46-miglior-rapporto-qualitacosto">Claude Sonnet 4.6 — Miglior rapporto qualità/costo</h3>
-<p>Il punto di equilibrio ideale per la maggior parte dei casi d'uso professionali.</p>
-<ul>
-<li>Coding quotidiano: scrittura, refactoring, debug, code review</li>
-<li>Generazione e analisi di testi professionali</li>
-<li>Risposta a domande tecniche con contesto esteso</li>
-<li>Integrazione in applicazioni con volumi medi</li>
-<li>Automazioni e pipeline agentic di media complessità</li>
-<li>Assistente per ricerca e summarization</li>
-<li>Ideale per Claude Code nell'uso quotidiano</li>
-</ul>
-<p><strong>Nota</strong>: supporta <em>adaptive thinking</em> (ragionamento adattivo) insieme a Opus 4.6.</p>
-<hr />
-<h3 id="claude-haiku-45-velocita-e-basso-costo">Claude Haiku 4.5 — Velocità e basso costo</h3>
-<p>Il modello più rapido ed economico. Ottimo per task ad alto volume o con latenza critica.</p>
-<ul>
-<li>Classificazione e tagging di testi</li>
-<li>Estrazione di entità e dati strutturati</li>
-<li>Risposte brevi in chatbot e assistenti leggeri</li>
-<li>Moderazione contenuti</li>
-<li>Pipeline batch ad alto volume</li>
-<li>Riassunti rapidi di testi brevi</li>
-<li>Primo stadio in pipeline multi-modello (filtraggio prima di passare a modelli più grandi)</li>
-</ul>
-<hr />
-<h2 id="funzionalita-per-modello">Funzionalità per modello</h2>
-<table>
-<thead>
-<tr>
-<th>Funzionalità</th>
-<th style="text-align: center;">Opus 4.6</th>
-<th style="text-align: center;">Sonnet 4.6</th>
-<th style="text-align: center;">Haiku 4.5</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Extended thinking</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-</tr>
-<tr>
-<td>Adaptive thinking</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td>Contesto 1M token</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td>Batch API 300k output</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">—</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Extended thinking</strong>: il modello ragiona passo per passo prima di rispondere (visibile nel "thinking block"). Migliora le prestazioni su task complessi.</p>
-<p><strong>Adaptive thinking</strong>: il modello decide autonomamente quanto pensare in base alla difficoltà del task.</p>
-<hr />
-<h2 id="modelli-legacy">Modelli legacy</h2>
-<p>Disponibili ma non consigliati per nuovi progetti. Usa le versioni 4.x sopra.</p>
-<table>
-<thead>
-<tr>
-<th>Modello</th>
-<th>ID API</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Claude Opus 4.5</td>
-<td><code>claude-opus-4-5-20251101</code></td>
-<td>Predecessore di Opus 4.6</td>
-</tr>
-<tr>
-<td>Claude Sonnet 4.5</td>
-<td><code>claude-sonnet-4-5-20250929</code></td>
-<td>Predecessore di Sonnet 4.6</td>
-</tr>
-<tr>
-<td>Claude Opus 4.1</td>
-<td><code>claude-opus-4-1-20250805</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td>Claude Sonnet 4</td>
-<td><code>claude-sonnet-4-20250514</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td>Claude Opus 4</td>
-<td><code>claude-opus-4-20250514</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td>Claude Haiku 3</td>
-<td><code>claude-3-haiku-20240307</code></td>
-<td>Deprecated</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="extended-thinking-ragionamento-esteso">Extended Thinking (Ragionamento esteso)</h2>
-<p>Alcuni modelli possono "pensare" prima di rispondere, mostrando il ragionamento passo per passo in blocchi separati (<code>thinking</code> blocks). Utile per task complessi; da evitare per domande semplici (spreco di token).</p>
-<h3 id="modalita-disponibili">Modalità disponibili</h3>
-<p><strong>Adattiva</strong> — consigliata per Opus 4.6 e Sonnet 4.6
-Il modello decide autonomamente quanto pensare in base alla complessità del task. Si controlla con il parametro <code>effort</code>:</p>
-<pre><code class="language-python">thinking={&quot;type&quot;: &quot;adaptive&quot;, &quot;effort&quot;: &quot;high&quot;}  # low | medium | high
-</code></pre>
-<p><strong>Manuale</strong> — disponibile su tutti i modelli con extended thinking, deprecata su Opus/Sonnet 4.6
-Si specifica un budget fisso di token per il ragionamento:</p>
-<pre><code class="language-python">thinking={&quot;type&quot;: &quot;enabled&quot;, &quot;budget_tokens&quot;: 10000}
-</code></pre>
-<p>Il <code>budget_tokens</code> deve essere inferiore a <code>max_tokens</code>.</p>
-<h3 id="visualizzazione-del-thinking">Visualizzazione del thinking</h3>
-<table>
-<thead>
-<tr>
-<th>Opzione <code>display</code></th>
-<th>Effetto</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>"summarized"</code> (default)</td>
-<td>Restituisce un riassunto del ragionamento</td>
-</tr>
-<tr>
-<td><code>"omitted"</code></td>
-<td>Nasconde il thinking, streaming più veloce</td>
-</tr>
-</tbody>
-</table>
-<p>In entrambi i casi vieni addebitato per i <strong>token di thinking completi</strong>.</p>
-<h3 id="quando-usarlo">Quando usarlo</h3>
-<table>
-<thead>
-<tr>
-<th>Scenario</th>
-<th>Consiglio</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Matematica, logica, algoritmi complessi</td>
-<td><code>effort: "high"</code> o budget alto</td>
-</tr>
-<tr>
-<td>Coding con molte dipendenze</td>
-<td><code>effort: "medium"</code></td>
-</tr>
-<tr>
-<td>Domande semplici, chat, classificazione</td>
-<td>Non usarlo</td>
-</tr>
-</tbody>
-</table>
-<h3 id="supporto-per-modello">Supporto per modello</h3>
-<table>
-<thead>
-<tr>
-<th>Modello</th>
-<th style="text-align: center;">Extended thinking</th>
-<th style="text-align: center;">Adaptive thinking</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Opus 4.6</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-</tr>
-<tr>
-<td>Sonnet 4.6</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-</tr>
-<tr>
-<td>Haiku 4.5</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">—</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>Con tool use e thinking abilitato, il modello può ragionare tra una chiamata e l'altra (interleaved thinking). I blocchi di thinking vanno passati invariati nelle richieste successive per mantenere la continuità del ragionamento.</p>
-</blockquote>
-<hr />
-<h2 id="note-pratiche">Note pratiche</h2>
-<ul>
-<li>I modelli sono disponibili su <strong>Anthropic API</strong>, <strong>AWS Bedrock</strong> e <strong>Google Vertex AI</strong> con ID leggermente diversi</li>
-<li>Per interrogare capabilities e limiti token via API: endpoint <code>/v1/models</code></li>
-<li>La <strong>Batch API</strong> riduce i costi del 50% per elaborazioni asincrone (risultati entro 24h)</li>
-</ul>
-<hr />
-<h1 id="mcp-model-context-protocol">MCP - Model Context Protocol</h1>
-<p>Configurazione e uso dei server MCP per connettere Claude a servizi esterni.</p>
-<p>MCP estende Claude Code con accesso a strumenti esterni, database, API e servizi tramite un protocollo standardizzato. Oltre 300 integrazioni disponibili (GitHub, Slack, PostgreSQL, ecc.).</p>
-<h2 id="aggiungere-un-server-mcp">Aggiungere un server MCP</h2>
-<pre><code class="language-bash"># Wizard interattivo
-claude mcp add
+├── api-conventions.md # Decisioni di design API</code></pre>
+      <p><strong>Limiti di caricamento</strong>:</p>
+      <ul>
+      <li><code>MEMORY.md</code>: prime 200 righe o 25KB — il resto non
+      viene caricato all&#39;avvio</li>
+      <li>I file topic (es. <code>debugging.md</code>) non vengono
+      caricati all&#39;avvio — Claude li legge on demand</li>
+      </ul>
+      <p><strong>Gestione</strong>: usa <code>/memory</code> per
+      sfogliare, modificare o eliminare i file di memoria. I file sono
+      plain markdown editabili manualmente.</p>
+      <p><strong>Disabilitare</strong>: imposta
+      <code>autoMemoryEnabled: false</code> nelle impostazioni o la
+      variabile d&#39;ambiente
+      <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY=1</code>.</p>
+      <hr />
+      <h1 id="prompting">Prompting</h1>
+      <p>Best practice per scrivere prompt efficaci con Claude.</p>
+      <h2 id="regole-base">Regole base</h2>
+      <ul>
+      <li>Essere chiari e dettagliati nella richiesta</li>
+      <li>Usare esempi positivi e negativi</li>
+      <li>Incoraggiare il ragionamento step-by-step</li>
+      <li>Richiedere tag XML specifici per strutturare l&#39;output</li>
+      <li>Specificare lunghezza e formato desiderati</li>
+      </ul>
+      <p>Guida completa: <a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview">https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview</a></p>
+      <h2 id="struttura-delle-richieste">Struttura delle richieste</h2>
+      <ul>
+      <li><strong>Contesto e vincoli prima, richiesta operativa
+      dopo</strong>: fornire sempre il contesto necessario
+      <em>prima</em> di chiedere l&#39;azione. Se si danno vincoli dopo,
+      Claude potrebbe aver già imboccato una strada sbagliata</li>
+      <li><strong>Una richiesta per messaggio</strong>: evitare di
+      comprimere più richieste non correlate in un singolo messaggio.
+      Ogni richiesta separata ottiene risposte più precise</li>
+      <li><strong>Riportare risultati esatti</strong>: quando si testa
+      qualcosa e si chiede aiuto, includere log, errori e screenshot
+      concreti anziché descrizioni vaghe</li>
+      <li><strong>Mettere in discussione le proposte</strong>: non
+      accettare passivamente — ragionare sulla proposta e obiettare se
+      qualcosa non convince</li>
+      </ul>
+      <h2 id="auto-analisi-del-proprio-stile-di-prompting">Auto-analisi
+      del proprio stile di prompting</h2>
+      <p>Un metodo efficace per migliorare è chiedere all&#39;AI di
+      <strong>analizzare le proprie conversazioni</strong> alla fine di
+      sessioni di lavoro sostanziali:</p>
+      <blockquote>
+      <p><em>&quot;Analizza come faccio le richieste in questa conversazione,
+      evidenziando sia i punti efficaci che quelli deboli.&quot;</em></p>
+      </blockquote>
+      <p><strong>Quando funziona meglio</strong>: dopo sessioni
+      collaborative complesse (costruzione di codice, documenti,
+      progetti) con errori, correzioni e cambi di direzione — non dopo
+      semplici Q&amp;A.</p>
+      <p><strong>Piattaforma ideale</strong>: Claude Code con Opus (1M
+      token di contesto) permette di analizzare sessioni molto
+      lunghe.</p>
+      <p><strong>Ripetere periodicamente</strong>: rifare l&#39;analisi a
+      distanza di settimane per monitorare l&#39;evoluzione dei propri
+      pattern comunicativi.</p>
+      <blockquote>
+      <p>È importante chiedere sia punti di forza che debolezze:
+      chiedere solo i punti di forza genera elogi generici, solo le
+      debolezze produce critiche decontestualizzate.</p>
+      </blockquote>
+      <hr />
+      <h1 id="claude-api-e-modelli">Claude API e Modelli</h1>
+      <h2 id="modelli-attuali-generazione-4x">Modelli attuali
+      (generazione 4.x)</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Modello</th>
+      <th>ID API</th>
+      <th>Contesto</th>
+      <th>Output max</th>
+      <th>Prezzo (input/output per MTok)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Claude Opus 4.6</td>
+      <td><code>claude-opus-4-6</code></td>
+      <td>1M token</td>
+      <td>128k</td>
+      <td>$5 / $25</td>
+      </tr>
+      <tr>
+      <td>Claude Sonnet 4.6</td>
+      <td><code>claude-sonnet-4-6</code></td>
+      <td>1M token</td>
+      <td>64k</td>
+      <td>$3 / $15</td>
+      </tr>
+      <tr>
+      <td>Claude Haiku 4.5</td>
+      <td><code>claude-haiku-4-5-20251001</code></td>
+      <td>200k token</td>
+      <td>64k</td>
+      <td>$1 / $5</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p>Knowledge cutoff: Opus 4.6 → mag 2025, Sonnet 4.6 → ago 2025,
+      Haiku 4.5 → feb 2025</p>
+      </blockquote>
+      <hr />
+      <h2 id="casi-duso-consigliati">Casi d&#39;uso consigliati</h2>
+      <h3 id="claude-opus-46--massima-intelligenza">Claude Opus 4.6 —
+      Massima intelligenza</h3>
+      <p>Il modello più capace. Da usare quando la qualità del risultato
+      conta più del costo o della velocità.</p>
+      <ul>
+      <li>Ragionamento multi-step complesso (matematica, logica,
+      strategia)</li>
+      <li>Analisi approfondita di documenti lunghi (fino a 1M token di
+      contesto)</li>
+      <li>Scrittura creativa di alta qualità</li>
+      <li>Ricerca e sintesi su argomenti tecnici complessi</li>
+      <li>Agentic tasks con pianificazione autonoma e uso di
+      strumenti</li>
+      <li>Coding su codebase grandi con molte dipendenze da tenere a
+      mente</li>
+      <li>Revisione critica di architetture e decisioni di design</li>
+      </ul>
+      <p><strong>Quando NON usarlo</strong>: task semplici e ripetitivi,
+      elaborazioni in batch ad alto volume, applicazioni real-time dove
+      la latenza è critica.</p>
+      <hr />
+      <h3 id="claude-sonnet-46--miglior-rapporto-qualitàcosto">Claude
+      Sonnet 4.6 — Miglior rapporto qualità/costo</h3>
+      <p>Il punto di equilibrio ideale per la maggior parte dei casi
+      d&#39;uso professionali.</p>
+      <ul>
+      <li>Coding quotidiano: scrittura, refactoring, debug, code
+      review</li>
+      <li>Generazione e analisi di testi professionali</li>
+      <li>Risposta a domande tecniche con contesto esteso</li>
+      <li>Integrazione in applicazioni con volumi medi</li>
+      <li>Automazioni e pipeline agentic di media complessità</li>
+      <li>Assistente per ricerca e summarization</li>
+      <li>Ideale per Claude Code nell&#39;uso quotidiano</li>
+      </ul>
+      <p><strong>Nota</strong>: supporta <em>adaptive thinking</em>
+      (ragionamento adattivo) insieme a Opus 4.6.</p>
+      <hr />
+      <h3 id="claude-haiku-45--velocità-e-basso-costo">Claude Haiku 4.5
+      — Velocità e basso costo</h3>
+      <p>Il modello più rapido ed economico. Ottimo per task ad alto
+      volume o con latenza critica.</p>
+      <ul>
+      <li>Classificazione e tagging di testi</li>
+      <li>Estrazione di entità e dati strutturati</li>
+      <li>Risposte brevi in chatbot e assistenti leggeri</li>
+      <li>Moderazione contenuti</li>
+      <li>Pipeline batch ad alto volume</li>
+      <li>Riassunti rapidi di testi brevi</li>
+      <li>Primo stadio in pipeline multi-modello (filtraggio prima di
+      passare a modelli più grandi)</li>
+      </ul>
+      <hr />
+      <h2 id="funzionalità-per-modello">Funzionalità per modello</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Funzionalità</th>
+      <th style="text-align: center;">Opus 4.6</th>
+      <th style="text-align: center;">Sonnet 4.6</th>
+      <th style="text-align: center;">Haiku 4.5</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Extended thinking</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      </tr>
+      <tr>
+      <td>Adaptive thinking</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">—</td>
+      </tr>
+      <tr>
+      <td>Contesto 1M token</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">—</td>
+      </tr>
+      <tr>
+      <td>Batch API 300k output</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">—</td>
+      </tr>
+      </tbody>
+      </table>
+      <p><strong>Extended thinking</strong>: il modello ragiona passo
+      per passo prima di rispondere (visibile nel &quot;thinking block&quot;).
+      Migliora le prestazioni su task complessi.</p>
+      <p><strong>Adaptive thinking</strong>: il modello decide
+      autonomamente quanto pensare in base alla difficoltà del task.</p>
+      <hr />
+      <h2 id="modelli-legacy">Modelli legacy</h2>
+      <p>Disponibili ma non consigliati per nuovi progetti. Usa le
+      versioni 4.x sopra.</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Modello</th>
+      <th>ID API</th>
+      <th>Note</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Claude Opus 4.5</td>
+      <td><code>claude-opus-4-5-20251101</code></td>
+      <td>Predecessore di Opus 4.6</td>
+      </tr>
+      <tr>
+      <td>Claude Sonnet 4.5</td>
+      <td><code>claude-sonnet-4-5-20250929</code></td>
+      <td>Predecessore di Sonnet 4.6</td>
+      </tr>
+      <tr>
+      <td>Claude Opus 4.1</td>
+      <td><code>claude-opus-4-1-20250805</code></td>
+      <td>—</td>
+      </tr>
+      <tr>
+      <td>Claude Sonnet 4</td>
+      <td><code>claude-sonnet-4-20250514</code></td>
+      <td>—</td>
+      </tr>
+      <tr>
+      <td>Claude Opus 4</td>
+      <td><code>claude-opus-4-20250514</code></td>
+      <td>—</td>
+      </tr>
+      <tr>
+      <td>Claude Haiku 3</td>
+      <td><code>claude-3-haiku-20240307</code></td>
+      <td>Deprecated</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2 id="extended-thinking-ragionamento-esteso">Extended Thinking
+      (Ragionamento esteso)</h2>
+      <p>Alcuni modelli possono &quot;pensare&quot; prima di rispondere, mostrando
+      il ragionamento passo per passo in blocchi separati
+      (<code>thinking</code> blocks). Utile per task complessi; da
+      evitare per domande semplici (spreco di token).</p>
+      <h3 id="modalità-disponibili">Modalità disponibili</h3>
+      <p><strong>Adattiva</strong> — consigliata per Opus 4.6 e Sonnet
+      4.6 Il modello decide autonomamente quanto pensare in base alla
+      complessità del task. Si controlla con il parametro
+      <code>effort</code>:</p>
+      <div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>thinking<span class="op">=</span>{<span class="st">&quot;type&quot;</span>: <span class="st">&quot;adaptive&quot;</span>, <span class="st">&quot;effort&quot;</span>: <span class="st">&quot;high&quot;</span>}  <span class="co"># low | medium | high</span></span></code></pre></div>
+      <p><strong>Manuale</strong> — disponibile su tutti i modelli con
+      extended thinking, deprecata su Opus/Sonnet 4.6 Si specifica un
+      budget fisso di token per il ragionamento:</p>
+      <div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>thinking<span class="op">=</span>{<span class="st">&quot;type&quot;</span>: <span class="st">&quot;enabled&quot;</span>, <span class="st">&quot;budget_tokens&quot;</span>: <span class="dv">10000</span>}</span></code></pre></div>
+      <p>Il <code>budget_tokens</code> deve essere inferiore a
+      <code>max_tokens</code>.</p>
+      <h3 id="visualizzazione-del-thinking">Visualizzazione del
+      thinking</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Opzione <code>display</code></th>
+      <th>Effetto</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>&quot;summarized&quot;</code> (default)</td>
+      <td>Restituisce un riassunto del ragionamento</td>
+      </tr>
+      <tr>
+      <td><code>&quot;omitted&quot;</code></td>
+      <td>Nasconde il thinking, streaming più veloce</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>In entrambi i casi vieni addebitato per i <strong>token di
+      thinking completi</strong>.</p>
+      <h3 id="quando-usarlo">Quando usarlo</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Scenario</th>
+      <th>Consiglio</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Matematica, logica, algoritmi complessi</td>
+      <td><code>effort: &quot;high&quot;</code> o budget alto</td>
+      </tr>
+      <tr>
+      <td>Coding con molte dipendenze</td>
+      <td><code>effort: &quot;medium&quot;</code></td>
+      </tr>
+      <tr>
+      <td>Domande semplici, chat, classificazione</td>
+      <td>Non usarlo</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="supporto-per-modello">Supporto per modello</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Modello</th>
+      <th style="text-align: center;">Extended thinking</th>
+      <th style="text-align: center;">Adaptive thinking</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Opus 4.6</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      </tr>
+      <tr>
+      <td>Sonnet 4.6</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">✓</td>
+      </tr>
+      <tr>
+      <td>Haiku 4.5</td>
+      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">—</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p>Con tool use e thinking abilitato, il modello può ragionare tra
+      una chiamata e l&#39;altra (interleaved thinking). I blocchi di
+      thinking vanno passati invariati nelle richieste successive per
+      mantenere la continuità del ragionamento.</p>
+      </blockquote>
+      <hr />
+      <h2 id="note-pratiche">Note pratiche</h2>
+      <ul>
+      <li>I modelli sono disponibili su <strong>Anthropic API</strong>,
+      <strong>AWS Bedrock</strong> e <strong>Google Vertex AI</strong>
+      con ID leggermente diversi</li>
+      <li>Per interrogare capabilities e limiti token via API: endpoint
+      <code>/v1/models</code></li>
+      <li>La <strong>Batch API</strong> riduce i costi del 50% per
+      elaborazioni asincrone (risultati entro 24h)</li>
+      </ul>
+      <hr />
+      <h1 id="mcp---model-context-protocol">MCP - Model Context
+      Protocol</h1>
+      <p>Configurazione e uso dei server MCP per connettere Claude a
+      servizi esterni.</p>
+      <p>MCP estende Claude Code con accesso a strumenti esterni,
+      database, API e servizi tramite un protocollo standardizzato.
+      Oltre 300 integrazioni disponibili (GitHub, Slack, PostgreSQL,
+      ecc.).</p>
+      <h2 id="aggiungere-un-server-mcp">Aggiungere un server MCP</h2>
+      <div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Wizard interattivo</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Oppure direttamente</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="op">&lt;</span>nome-server<span class="op">&gt;</span> -- <span class="op">&lt;</span>comando<span class="op">&gt;</span></span></code></pre></div>
+      <p>Senza MCP, Claude Code può solo leggere file ed eseguire
+      comandi bash. Con MCP può interrogare database, creare ticket
+      Jira, fare review su GitHub, controllare errori su Sentry,
+      ecc.</p>
+      <hr />
+      <h1 id="limiti-e-pricing">Limiti e Pricing</h1>
+      <p>Rate limit, costi per token, differenze tra piani e
+      modelli.</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Piano</th>
+      <th>Costo</th>
+      <th>Include Claude Code</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Free</td>
+      <td>$0</td>
+      <td>No</td>
+      </tr>
+      <tr>
+      <td>Pro</td>
+      <td>$20/mese</td>
+      <td>Sì</td>
+      </tr>
+      <tr>
+      <td>Max</td>
+      <td>$100/mese</td>
+      <td>Sì, con limiti più alti</td>
+      </tr>
+      <tr>
+      <td>Max 20x</td>
+      <td>$200/mese</td>
+      <td>Sì, limiti massimi</td>
+      </tr>
+      <tr>
+      <td>API (Console)</td>
+      <td>Pay-per-use</td>
+      <td>Sì, tramite API key</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p>Per uso frequente di Claude Code, un abbonamento Max è
+      generalmente più economico rispetto al pay-per-use via API.</p>
+      </blockquote>
+      <h2 id="ottimizzazione-dei-token">Ottimizzazione dei token</h2>
+      <p>Un file <code>CLAUDE.md</code> ben strutturato con regole
+      anti-verbosità può ridurre i token di output di circa il 63%
+      (benchmark su 5 prompt con Sonnet).</p>
+      <p><strong>Proiezione a scala</strong>: con 1000 prompt/giorno si
+      risparmiano circa 96.000 token e ~$8.64/mese (Sonnet).</p>
+      <blockquote>
+      <p><strong>Nota</strong>: il file CLAUDE.md stesso consuma token
+      di input ad ogni messaggio. Il risparmio netto è positivo solo con
+      volumi sufficienti. Per uso occasionale può costare più di quanto
+      fa risparmiare.</p>
+      </blockquote>
+      <hr />
+      <h1 id="tips--tricks">Tips &amp; Tricks</h1>
+      <h2 id="comandi-utili">Comandi utili</h2>
+      <ul>
+      <li>Usa <code>ultrathink</code> nel prompt per attivare il livello
+      massimo di extended thinking</li>
+      <li>Usa <code>/clear</code> per iniziare un task nuovo con
+      contesto pulito</li>
+      <li>Usa <code>/compact</code> con cautela: compatta la sessione ma
+      è lento e può perdere dettagli</li>
+      <li>Per task lunghi, chiedi a Claude di salvare la sessione
+      corrente in un file <code>.md</code> in <code>docs/</code></li>
+      <li>Usa le checkbox markdown <code>[ ]</code> nei file di piano
+      per tracciare il progresso — Claude può spuntarle</li>
+      <li>Metti il repo <code>~/.claude/</code> sotto git per versionare
+      la tua configurazione globale</li>
+      </ul>
+      <h2 id="ridurre-la-verbosità-delloutput">Ridurre la verbosità
+      dell&#39;output</h2>
+      <p>Claude Code tende ad essere verboso per default. È possibile
+      ridurre l&#39;output di circa il 63% con regole nel
+      <code>CLAUDE.md</code>:</p>
+      <ul>
+      <li><strong>Eliminare aperture adulatorie</strong> (&quot;Sure!&quot;,
+      &quot;Great question!&quot;) e chiusure vuote (&quot;I hope this helps!&quot;)</li>
+      <li><strong>Evitare la riformulazione della domanda</strong> prima
+      di rispondere</li>
+      <li><strong>Richiedere solo ASCII</strong>: em dash, smart quotes
+      e caratteri Unicode possono rompere i parser</li>
+      <li><strong>No disclaimer non necessari</strong> e frasi tipo &quot;As
+      an AI...&quot;</li>
+      </ul>
+      <blockquote>
+      <p><strong>Attenzione</strong>: il file CLAUDE.md stesso consuma
+      token di input ad ogni messaggio. Il risparmio netto è positivo
+      solo con un volume di output sufficiente a compensare. Per query
+      brevi e uso occasionale, può costare più di quanto fa
+      risparmiare.</p>
+      </blockquote>
+      <h2 id="workflow-efficace-per-il-codice">Workflow efficace per il
+      codice</h2>
+      <ul>
+      <li><strong>Prima di scrivere</strong>: leggere tutti i file
+      rilevanti e capire il requisito completo</li>
+      <li><strong>Durante la scrittura</strong>: preferire edit mirate a
+      riscritture complete, puntare alla soluzione più semplice
+      possibile</li>
+      <li><strong>Prima di dichiarare &quot;fatto&quot;</strong>: eseguire il
+      codice un&#39;ultima volta — mai dichiarare fatto senza un test che
+      passa</li>
+      <li><strong>&quot;Tre righe simili sono meglio di un&#39;astrazione
+      prematura&quot;</strong>: evitare over-engineering</li>
+      </ul>
+      <hr />
+      <h1 id="link-utili">Link Utili</h1>
+      <ul>
+      <li><a href="https://docs.claude.com">Documentazione ufficiale
+      Claude</a></li>
+      <li><a href="https://support.claude.com">Supporto Claude</a></li>
+      <li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview">Guida
+      al Prompting</a></li>
+      <li><a href="https://code.claude.com/docs">Claude Code
+      Docs</a></li>
+      <li><a href="https://code.claude.com/docs/en/setup">Claude Code
+      Setup</a></li>
+      <li><a href="https://code.claude.com/docs/en/memory">Claude Code
+      Memory</a></li>
+      <li><a href="https://github.com/anthropics/anthropic-cookbook">Anthropic
+      Cookbook (GitHub)</a></li>
+      <li><a href="https://github.com/shanraisshan/claude-code-best-practice">Claude
+      Code Best Practices (GitHub)</a></li>
+      </ul>
+      <hr />
+      <h1 id="stato-del-servizio">Stato del Servizio</h1>
+      <p>La pagina ufficiale <strong><a href="https://status.claude.com/">status.claude.com</a></strong>
+      mostra in tempo reale lo stato operativo di tutti i servizi
+      Anthropic/Claude.</p>
+      <h2 id="servizi-monitorati">Servizi monitorati</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Servizio</th>
+      <th>URL</th>
+      <th>Uptime (90gg)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>claude.ai</td>
+      <td>Piattaforma web</td>
+      <td>~98.9%</td>
+      </tr>
+      <tr>
+      <td>platform.claude.com</td>
+      <td>Console e gestione API</td>
+      <td>~99.3%</td>
+      </tr>
+      <tr>
+      <td>Claude API</td>
+      <td>api.anthropic.com</td>
+      <td>~99.0%</td>
+      </tr>
+      <tr>
+      <td>Claude Code</td>
+      <td>Editor integrato</td>
+      <td>~99.3%</td>
+      </tr>
+      <tr>
+      <td>Claude for Government</td>
+      <td>Versione governativa</td>
+      <td>~99.9%</td>
+      </tr>
+      </tbody>
+      </table>
+      <h2 id="stati-possibili">Stati possibili</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Stato</th>
+      <th>Significato</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><strong>Operational</strong></td>
+      <td>Funzionamento normale</td>
+      </tr>
+      <tr>
+      <td><strong>Degraded Performance</strong></td>
+      <td>Rallentamenti o latenza elevata</td>
+      </tr>
+      <tr>
+      <td><strong>Partial Outage</strong></td>
+      <td>Interruzione parziale del servizio</td>
+      </tr>
+      <tr>
+      <td><strong>Major Outage</strong></td>
+      <td>Disservizio significativo</td>
+      </tr>
+      </tbody>
+      </table>
+      <h2 id="storico-e-uptime">Storico e uptime</h2>
+      <p>La pagina mostra un grafico degli ultimi 90 giorni
+      (selezionabile a 30/60/90 giorni) con indicazione visiva dei
+      periodi di downtime. Ogni incidente è documentato con:</p>
+      <ul>
+      <li>Data e durata</li>
+      <li>Livello di impatto (critico, maggiore, minore, manutenzione
+      programmata)</li>
+      <li>Aggiornamenti cronologici durante l&#39;evento</li>
+      </ul>
+      <h2 id="notifiche">Notifiche</h2>
+      <p>È possibile iscriversi agli aggiornamenti di stato tramite:</p>
+      <ul>
+      <li><strong>Email</strong> (verifica OTP)</li>
+      <li><strong>SMS</strong> (verifica OTP)</li>
+      <li><strong>Slack</strong> (integrazione workspace)</li>
+      <li><strong>Microsoft Teams</strong> (webhook)</li>
+      <li><strong>Webhook personalizzato</strong></li>
+      <li><strong>Atom/RSS feed</strong> — utile per integrazioni custom
+      o monitoraggio automatico</li>
+      </ul>
+      <h2 id="quando-usarla">Quando usarla</h2>
+      <ul>
+      <li>Se Claude Code non risponde o si comporta in modo anomalo,
+      verifica prima lo stato del servizio</li>
+      <li>Prima di aprire un ticket di supporto, controlla se è già un
+      incident noto</li>
+      <li>Per monitorare l&#39;affidabilità nel tempo prima di integrare
+      l&#39;API in produzione</li>
+      </ul>
+      <hr />
+      <h1 id="plugin">Plugin</h1>
+      <p>I plugin estendono le capacità di Claude Code con workflow,
+      skill e automazioni aggiuntive. Si installano tramite il
+      marketplace integrato.</p>
+      <h2 id="installazione-plugin">Installazione plugin</h2>
+      <div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dal marketplace ufficiale</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install <span class="op">&lt;</span>nome<span class="op">&gt;</span>@claude-plugins-official</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Da un marketplace custom</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add <span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>marketplace-repo<span class="op">&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install <span class="op">&lt;</span>nome<span class="op">&gt;</span>@<span class="op">&lt;</span>marketplace<span class="op">&gt;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiornamento</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> update <span class="op">&lt;</span>nome<span class="op">&gt;</span></span></code></pre></div>
+      <h2 id="plugin-documentati">Plugin documentati</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Plugin</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><a href="plugin/superpowers.md">Superpowers</a></td>
+      <td>Framework agentico con skill per TDD, debugging sistematico,
+      pianificazione e code review</td>
+      </tr>
+      <tr>
+      <td><a href="plugin/claude-mem.md">Claude-Mem</a></td>
+      <td>Memoria persistente tra sessioni con compressione AI e ricerca
+      semantica</td>
+      </tr>
+      <tr>
+      <td><a href="plugin/claude-hud.md">Claude HUD</a></td>
+      <td>Dashboard visiva nel terminale: contesto, strumenti, agenti,
+      git, usage</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h1 id="claude-hud">Claude HUD</h1>
+      <table>
+      <thead>
+      <tr>
+      <th>Campo</th>
+      <th>Valore</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><strong>Repo</strong></td>
+      <td><a href="https://github.com/jarrodwatts/claude-hud">https://github.com/jarrodwatts/claude-hud</a></td>
+      </tr>
+      <tr>
+      <td><strong>Autore</strong></td>
+      <td>Jarrod Watts (@jarrodwatts)</td>
+      </tr>
+      <tr>
+      <td><strong>Licenza</strong></td>
+      <td>MIT</td>
+      </tr>
+      <tr>
+      <td><strong>Stelle</strong></td>
+      <td>~15.7k</td>
+      </tr>
+      <tr>
+      <td><strong>Piattaforme</strong></td>
+      <td>Claude Code (v1.0.80+)</td>
+      </tr>
+      </tbody>
+      </table>
+      <h2 id="cosè-1">Cos&#39;è</h2>
+      <p>Claude HUD è un plugin che aggiunge un&#39;<strong>interfaccia
+      visiva nella riga di stato del terminale</strong>, sempre visibile
+      sotto l&#39;input dell&#39;utente. Mostra in tempo reale: utilizzo del
+      contesto, strumenti attivi, agenti in esecuzione, progresso dei
+      task, stato git e limiti di utilizzo dell&#39;abbonamento.</p>
+      <h2 id="installazione">Installazione</h2>
+      <div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Aggiungere il marketplace</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add jarrodwatts/claude-hud</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Installare il plugin</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install claude-hud</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Configurare la statusline</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="ex">/claude-hud:setup</span></span></code></pre></div>
+      <p>Dopo il setup, riavviare completamente Claude Code.</p>
+      <blockquote>
+      <p><strong>Linux</strong>: se <code>/tmp</code> è un filesystem
+      separato, impostare prima
+      <code>mkdir -p ~/.cache/tmp &amp;&amp; TMPDIR=~/.cache/tmp claude</code></p>
+      <p><strong>Windows</strong>: se manca un runtime JS, installare
+      Node.js LTS con <code>winget install OpenJS.NodeJS.LTS</code></p>
+      </blockquote>
+      <h2 id="requisiti-1">Requisiti</h2>
+      <ul>
+      <li>Claude Code v1.0.80+</li>
+      <li>Node.js 18+ o Bun</li>
+      </ul>
+      <h2 id="cosa-mostra">Cosa mostra</h2>
+      <h3 id="layout-predefinito-2-righe">Layout predefinito (2
+      righe)</h3>
+      <pre><code>[Opus] │ my-project git:(main*)
+Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% (1h 30m / 5h)</code></pre>
+      <ul>
+      <li><strong>Riga 1</strong>: modello, provider (Bedrock/API),
+      percorso progetto, branch git</li>
+      <li><strong>Riga 2</strong>: barra contesto (verde → giallo →
+      rosso) e limiti utilizzo</li>
+      </ul>
+      <h3 id="linee-opzionali-disabilitate-di-default">Linee opzionali
+      (disabilitate di default)</h3>
+      <pre><code>◐ Edit: auth.ts | ✓ Read ×3 | ✓ Grep ×2        ← Attività strumenti
+◐ explore [haiku]: Finding auth code (2m 15s)    ← Stato agenti
+▸ Fix authentication bug (2/5)                    ← Progresso todo</code></pre>
+      <p>L&#39;aggiornamento avviene ogni ~300ms. I dati sul contesto sono
+      token nativi di Claude Code (non stimati), con supporto fino a 1M
+      di contesto.</p>
+      <h2 id="configurazione">Configurazione</h2>
+      <h3 id="configurazione-guidata">Configurazione guidata</h3>
+      <div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/claude-hud:configure</span></span></code></pre></div>
+      <p>Avvia un flusso interattivo per scegliere un preset e regolare
+      i singoli elementi.</p>
+      <h3 id="preset-disponibili">Preset disponibili</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Preset</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><strong>Full</strong></td>
+      <td>Tutti gli elementi abilitati (strumenti, agenti, todo, git,
+      utilizzo, durata)</td>
+      </tr>
+      <tr>
+      <td><strong>Essential</strong></td>
+      <td>Attività + stato git, minimo rumore visivo</td>
+      </tr>
+      <tr>
+      <td><strong>Minimal</strong></td>
+      <td>Solo modello e barra contesto</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="opzioni-principali">Opzioni principali</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Opzione</th>
+      <th>Default</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>display.showModel</code></td>
+      <td>true</td>
+      <td>Nome modello <code>[Opus]</code></td>
+      </tr>
+      <tr>
+      <td><code>display.showContextBar</code></td>
+      <td>true</td>
+      <td>Barra visuale contesto</td>
+      </tr>
+      <tr>
+      <td><code>display.showTools</code></td>
+      <td>false</td>
+      <td>Attività strumenti</td>
+      </tr>
+      <tr>
+      <td><code>display.showAgents</code></td>
+      <td>false</td>
+      <td>Stato agenti</td>
+      </tr>
+      <tr>
+      <td><code>display.showTodos</code></td>
+      <td>false</td>
+      <td>Progresso todo</td>
+      </tr>
+      <tr>
+      <td><code>display.showDuration</code></td>
+      <td>false</td>
+      <td>Durata sessione</td>
+      </tr>
+      <tr>
+      <td><code>display.showUsage</code></td>
+      <td>true</td>
+      <td>Limiti utilizzo abbonamento</td>
+      </tr>
+      <tr>
+      <td><code>display.showMemoryUsage</code></td>
+      <td>false</td>
+      <td>RAM approssimativa</td>
+      </tr>
+      <tr>
+      <td><code>gitStatus.enabled</code></td>
+      <td>true</td>
+      <td>Branch git</td>
+      </tr>
+      <tr>
+      <td><code>gitStatus.showDirty</code></td>
+      <td>true</td>
+      <td><code>*</code> per cambiamenti non committed</td>
+      </tr>
+      <tr>
+      <td><code>gitStatus.showAheadBehind</code></td>
+      <td>false</td>
+      <td><code>↑N ↓N</code> per commits ahead/behind</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>Il file di configurazione manuale si trova in
+      <code>~/.claude/plugins/claude-hud/config.json</code>.</p>
+      <h2 id="note-e-limitazioni">Note e limitazioni</h2>
+      <ul>
+      <li><strong>Usage</strong>: visibile solo per abbonati Claude
+      (Pro/Max), non per utenti API-only</li>
+      <li><strong>Memory usage</strong>: mostra RAM approssimativa della
+      macchina, non l&#39;uso preciso di Claude Code</li>
+      <li><strong>Git status</strong>: funziona solo dentro repository
+      git</li>
+      <li><strong>Strumenti/agenti/todo</strong>: disabilitati di
+      default, vanno abilitati nella configurazione</li>
+      <li>Quando il contesto supera l&#39;85% mostra un breakdown
+      dettagliato dei token</li>
+      </ul>
+      <hr />
+      <h1 id="claude-mem">Claude-Mem</h1>
+      <table>
+      <thead>
+      <tr>
+      <th>Campo</th>
+      <th>Valore</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><strong>Repo</strong></td>
+      <td><a href="https://github.com/thedotmack/claude-mem">https://github.com/thedotmack/claude-mem</a></td>
+      </tr>
+      <tr>
+      <td><strong>Autore</strong></td>
+      <td>Alex Newman (@thedotmack)</td>
+      </tr>
+      <tr>
+      <td><strong>Licenza</strong></td>
+      <td>AGPL-3.0</td>
+      </tr>
+      <tr>
+      <td><strong>Stelle</strong></td>
+      <td>~44k</td>
+      </tr>
+      <tr>
+      <td><strong>Versione</strong></td>
+      <td>6.5.0</td>
+      </tr>
+      <tr>
+      <td><strong>Piattaforme</strong></td>
+      <td>Claude Code, Claude Desktop</td>
+      </tr>
+      </tbody>
+      </table>
+      <h2 id="cosè-2">Cos&#39;è</h2>
+      <p>Claude-Mem è un plugin per Claude Code che implementa un
+      sistema di <strong>memoria persistente e compressione del
+      contesto</strong> tra sessioni. Cattura automaticamente ciò che
+      Claude fa durante le sessioni di codifica, comprime le
+      informazioni con AI e inietta il contesto rilevante nelle sessioni
+      future.</p>
+      <p>In pratica: mantiene la continuità della conoscenza progettuale
+      anche dopo la chiusura delle sessioni.</p>
+      <h2 id="installazione-1">Installazione</h2>
+      <div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add thedotmack/claude-mem</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install claude-mem</span></code></pre></div>
+      <p>Dopo il riavvio di Claude Code, il contesto delle sessioni
+      precedenti apparirà automaticamente.</p>
+      <blockquote>
+      <p><strong>Nota</strong>: <code>npm install -g claude-mem</code>
+      installa solo la libreria SDK, non il plugin completo con hook
+      system e worker service.</p>
+      </blockquote>
+      <h2 id="requisiti-2">Requisiti</h2>
+      <ul>
+      <li>Node.js &gt;= 18.0.0</li>
+      <li>Claude Code con supporto plugin</li>
+      <li>Bun (auto-installato se mancante)</li>
+      <li>uv — Python package manager per ricerca vettoriale
+      (auto-installato)</li>
+      <li>SQLite 3 (incluso)</li>
+      </ul>
+      <h2 id="come-funziona">Come funziona</h2>
+      <h3 id="lifecycle-hooks">Lifecycle hooks</h3>
+      <p>Il plugin si aggancia a 5 eventi del ciclo di vita di Claude
+      Code:</p>
+      <ul>
+      <li><strong>SessionStart</strong> — Inietta contesto dalle
+      sessioni precedenti</li>
+      <li><strong>UserPromptSubmit</strong> — Cattura le richieste
+      dell&#39;utente</li>
+      <li><strong>PostToolUse</strong> — Osserva l&#39;uso degli
+      strumenti</li>
+      <li><strong>Stop</strong> — Gestisce la fine
+      dell&#39;elaborazione</li>
+      <li><strong>SessionEnd</strong> — Salva e comprime le osservazioni
+      della sessione</li>
+      </ul>
+      <h3 id="worker-service">Worker service</h3>
+      <p>Un servizio HTTP in background (porta 37777, gestito da Bun)
+      con:</p>
+      <ul>
+      <li>Database SQLite per sessioni, osservazioni, riassunti</li>
+      <li>Database vettoriale Chroma per ricerca semantica +
+      keyword</li>
+      <li>Interfaccia web viewer su <code>localhost:37777</code></li>
+      <li>10 endpoint di ricerca</li>
+      </ul>
+      <h3 id="ricerca-a-3-livelli-token-efficiente">Ricerca a 3 livelli
+      (token-efficiente)</h3>
+      <p>Il sistema usa una strategia di <strong>progressive
+      disclosure</strong> per risparmiare token (~10x):</p>
+      <ol type="1">
+      <li><strong><code>search</code></strong> — Indice compatto con ID
+      (~50-100 token per risultato)</li>
+      <li><strong><code>timeline</code></strong> — Contesto cronologico
+      attorno ai risultati</li>
+      <li><strong><code>get_observations</code></strong> — Dettagli
+      completi per ID filtrati (~500-1.000 token)</li>
+      </ol>
+      <p>Si filtra prima di recuperare i dettagli, evitando di caricare
+      tutto in contesto.</p>
+      <h2 id="funzionalità-principali">Funzionalità principali</h2>
+      <ul>
+      <li><strong>Memoria persistente</strong> tra sessioni con
+      compressione AI</li>
+      <li><strong>Ricerca in linguaggio naturale</strong> tramite la
+      skill <code>mem-search</code></li>
+      <li><strong>Ricerca ibrida</strong> semantica + keyword (Chroma
+      vector DB)</li>
+      <li><strong>Controllo privacy</strong>: il tag
+      <code>&lt;private&gt;</code> esclude contenuti sensibili dalla
+      memorizzazione</li>
+      <li><strong>Sistema di citazioni</strong> con ID osservazioni per
+      tracciabilità</li>
+      <li><strong>Configurazione granulare</strong> del contesto
+      iniettato (<code>~/.claude-mem/settings.json</code>)</li>
+      <li><strong>Interfaccia web</strong> per consultare la memoria su
+      <code>localhost:37777</code></li>
+      </ul>
+      <h2 id="risorse">Risorse</h2>
+      <ul>
+      <li>Documentazione: <a href="https://docs.claude-mem.ai">https://docs.claude-mem.ai</a></li>
+      <li>Discord: <a href="https://discord.com/invite/J4wttp9vDu">https://discord.com/invite/J4wttp9vDu</a></li>
+      </ul>
+      <hr />
+      <h1 id="superpowers">Superpowers</h1>
+      <table>
+      <thead>
+      <tr>
+      <th>Campo</th>
+      <th>Valore</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><strong>Repo</strong></td>
+      <td><a href="https://github.com/obra/superpowers">https://github.com/obra/superpowers</a></td>
+      </tr>
+      <tr>
+      <td><strong>Autore</strong></td>
+      <td>Jesse Vincent (Prime Radiant)</td>
+      </tr>
+      <tr>
+      <td><strong>Licenza</strong></td>
+      <td>MIT</td>
+      </tr>
+      <tr>
+      <td><strong>Stelle</strong></td>
+      <td>~128k</td>
+      </tr>
+      <tr>
+      <td><strong>Piattaforme</strong></td>
+      <td>Claude Code, Cursor, Codex, OpenCode, Gemini CLI</td>
+      </tr>
+      </tbody>
+      </table>
+      <h2 id="cosè-3">Cos&#39;è</h2>
+      <p>Superpowers è un framework agentico che fornisce un flusso di
+      lavoro completo per agenti di codifica. È costruito su un insieme
+      di <strong>skill componibili</strong> che automatizzano
+      metodologie di sviluppo software.</p>
+      <p>La filosofia di fondo: l&#39;agente non salta direttamente alla
+      codifica, ma segue un processo strutturato — chiede chiarimenti,
+      presenta il design, crea un piano di implementazione e applica TDD
+      rigoroso.</p>
+      <h2 id="installazione-2">Installazione</h2>
+      <p><strong>Claude Code (Official Marketplace):</strong></p>
+      <div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install superpowers@claude-plugins-official</span></code></pre></div>
+      <p><strong>Claude Code (Custom Marketplace):</strong></p>
+      <div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add obra/superpowers-marketplace</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install superpowers@superpowers-marketplace</span></code></pre></div>
+      <p><strong>Cursor:</strong></p>
+      <pre><code>/add-plugin superpowers</code></pre>
+      <p><strong>Aggiornamento:</strong></p>
+      <div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> update superpowers</span></code></pre></div>
+      <h2 id="come-funziona-1">Come funziona</h2>
+      <p>Le skill si attivano automaticamente quando Claude rileva
+      determinati contesti (es. &quot;aiutami a pianificare questa feature&quot;).
+      Non serve configurazione manuale post-installazione.</p>
+      <p>Il workflow tipico:</p>
+      <ol type="1">
+      <li>L&#39;agente chiede chiarimenti prima di procedere</li>
+      <li>Presenta il design in sezioni leggibili per validazione</li>
+      <li>Crea un piano di implementazione dettagliato</li>
+      <li>Avvia lo sviluppo guidato da subagenti con revisioni
+      automatiche</li>
+      <li>Applica TDD (Test-Driven Development) rigoroso</li>
+      </ol>
+      <h2 id="skill-disponibili">Skill disponibili</h2>
+      <h3 id="testing">Testing</h3>
+      <ul>
+      <li><strong>test-driven-development</strong> — Ciclo
+      RED-GREEN-REFACTOR automatizzato</li>
+      </ul>
+      <h3 id="debugging">Debugging</h3>
+      <ul>
+      <li><strong>systematic-debugging</strong> — Processo a 4 fasi per
+      root cause analysis</li>
+      <li><strong>verification-before-completion</strong> — Verifica che
+      il problema sia effettivamente risolto prima di dichiarare
+      &quot;fatto&quot;</li>
+      </ul>
+      <h3 id="collaborazione-e-pianificazione">Collaborazione e
+      pianificazione</h3>
+      <ul>
+      <li><strong>brainstorming</strong> — Raffinamento del design con
+      approccio socratico</li>
+      <li><strong>writing-plans</strong> — Piani di implementazione
+      dettagliati</li>
+      <li><strong>executing-plans</strong> — Esecuzione in batch con
+      checkpoint</li>
+      <li><strong>dispatching-parallel-agents</strong> — Flussi
+      paralleli di subagenti</li>
+      <li><strong>requesting-code-review</strong> e
+      <strong>receiving-code-review</strong> — Review del codice
+      strutturate</li>
+      </ul>
+      <h3 id="git-workflow">Git workflow</h3>
+      <ul>
+      <li><strong>using-git-worktrees</strong> — Branch di sviluppo
+      paralleli isolati</li>
+      <li><strong>finishing-a-development-branch</strong> — Workflow
+      decisionale per merge/PR</li>
+      <li><strong>subagent-driven-development</strong> — Revisione a due
+      stadi (conformità spec + qualità codice)</li>
+      </ul>
+      <h3 id="meta">Meta</h3>
+      <ul>
+      <li><strong>writing-skills</strong> — Creazione di nuove skill
+      personalizzate</li>
+      <li><strong>using-superpowers</strong> — Introduzione al
+      sistema</li>
+      </ul>
+      <h2 id="principi-guida">Principi guida</h2>
+      <ul>
+      <li><strong>Test-Driven Development</strong>: test prima di
+      tutto</li>
+      <li><strong>Approccio sistematico</strong> rispetto ad ad-hoc</li>
+      <li><strong>Riduzione della complessità</strong>: soluzioni
+      semplici</li>
+      <li><strong>Evidenza empirica</strong>: verificare sempre con dati
+      concreti</li>
+      </ul>
+      <h2 id="risorse-1">Risorse</h2>
+      <ul>
+      <li>Discord: <a href="https://discord.gg/Jd8Vphy9jq">https://discord.gg/Jd8Vphy9jq</a></li>
+      <li>Issues: <a href="https://github.com/obra/superpowers/issues">https://github.com/obra/superpowers/issues</a></li>
+      </ul>
+    </main>
 
-# Oppure direttamente
-claude mcp add &lt;nome-server&gt; -- &lt;comando&gt;
-</code></pre>
-<p>Senza MCP, Claude Code può solo leggere file ed eseguire comandi bash. Con MCP può interrogare database, creare ticket Jira, fare review su GitHub, controllare errori su Sentry, ecc.</p>
-<hr />
-<h1 id="limiti-e-pricing">Limiti e Pricing</h1>
-<p>Rate limit, costi per token, differenze tra piani e modelli.</p>
-<table>
-<thead>
-<tr>
-<th>Piano</th>
-<th>Costo</th>
-<th>Include Claude Code</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Free</td>
-<td>$0</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Pro</td>
-<td>$20/mese</td>
-<td>Sì</td>
-</tr>
-<tr>
-<td>Max</td>
-<td>$100/mese</td>
-<td>Sì, con limiti più alti</td>
-</tr>
-<tr>
-<td>Max 20x</td>
-<td>$200/mese</td>
-<td>Sì, limiti massimi</td>
-</tr>
-<tr>
-<td>API (Console)</td>
-<td>Pay-per-use</td>
-<td>Sì, tramite API key</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>Per uso frequente di Claude Code, un abbonamento Max è generalmente più economico rispetto al pay-per-use via API.</p>
-</blockquote>
-<h2 id="ottimizzazione-dei-token">Ottimizzazione dei token</h2>
-<p>Un file <code>CLAUDE.md</code> ben strutturato con regole anti-verbosità può ridurre i token di output di circa il 63% (benchmark su 5 prompt con Sonnet).</p>
-<p><strong>Proiezione a scala</strong>: con 1000 prompt/giorno si risparmiano circa 96.000 token e ~$8.64/mese (Sonnet).</p>
-<blockquote>
-<p><strong>Nota</strong>: il file CLAUDE.md stesso consuma token di input ad ogni messaggio. Il risparmio netto è positivo solo con volumi sufficienti. Per uso occasionale può costare più di quanto fa risparmiare.</p>
-</blockquote>
-<hr />
-<h1 id="tips-tricks">Tips &amp; Tricks</h1>
-<h2 id="comandi-utili">Comandi utili</h2>
-<ul>
-<li>Usa <code>ultrathink</code> nel prompt per attivare il livello massimo di extended thinking</li>
-<li>Usa <code>/clear</code> per iniziare un task nuovo con contesto pulito</li>
-<li>Usa <code>/compact</code> con cautela: compatta la sessione ma è lento e può perdere dettagli</li>
-<li>Per task lunghi, chiedi a Claude di salvare la sessione corrente in un file <code>.md</code> in <code>docs/</code></li>
-<li>Usa le checkbox markdown <code>[ ]</code> nei file di piano per tracciare il progresso — Claude può spuntarle</li>
-<li>Metti il repo <code>~/.claude/</code> sotto git per versionare la tua configurazione globale</li>
-</ul>
-<h2 id="ridurre-la-verbosita-delloutput">Ridurre la verbosità dell'output</h2>
-<p>Claude Code tende ad essere verboso per default. È possibile ridurre l'output di circa il 63% con regole nel <code>CLAUDE.md</code>:</p>
-<ul>
-<li><strong>Eliminare aperture adulatorie</strong> ("Sure!", "Great question!") e chiusure vuote ("I hope this helps!")</li>
-<li><strong>Evitare la riformulazione della domanda</strong> prima di rispondere</li>
-<li><strong>Richiedere solo ASCII</strong>: em dash, smart quotes e caratteri Unicode possono rompere i parser</li>
-<li><strong>No disclaimer non necessari</strong> e frasi tipo "As an AI..."</li>
-</ul>
-<blockquote>
-<p><strong>Attenzione</strong>: il file CLAUDE.md stesso consuma token di input ad ogni messaggio. Il risparmio netto è positivo solo con un volume di output sufficiente a compensare. Per query brevi e uso occasionale, può costare più di quanto fa risparmiare.</p>
-</blockquote>
-<h2 id="workflow-efficace-per-il-codice">Workflow efficace per il codice</h2>
-<ul>
-<li><strong>Prima di scrivere</strong>: leggere tutti i file rilevanti e capire il requisito completo</li>
-<li><strong>Durante la scrittura</strong>: preferire edit mirate a riscritture complete, puntare alla soluzione più semplice possibile</li>
-<li><strong>Prima di dichiarare "fatto"</strong>: eseguire il codice un'ultima volta — mai dichiarare fatto senza un test che passa</li>
-<li><strong>"Tre righe simili sono meglio di un'astrazione prematura"</strong>: evitare over-engineering</li>
-</ul>
-<hr />
-<h1 id="link-utili">Link Utili</h1>
-<ul>
-<li><a href="https://docs.claude.com">Documentazione ufficiale Claude</a></li>
-<li><a href="https://support.claude.com">Supporto Claude</a></li>
-<li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview">Guida al Prompting</a></li>
-<li><a href="https://code.claude.com/docs">Claude Code Docs</a></li>
-<li><a href="https://code.claude.com/docs/en/setup">Claude Code Setup</a></li>
-<li><a href="https://code.claude.com/docs/en/memory">Claude Code Memory</a></li>
-<li><a href="https://github.com/anthropics/anthropic-cookbook">Anthropic Cookbook (GitHub)</a></li>
-<li><a href="https://github.com/shanraisshan/claude-code-best-practice">Claude Code Best Practices (GitHub)</a></li>
-</ul>
-<hr />
-<h1 id="stato-del-servizio">Stato del Servizio</h1>
-<p>La pagina ufficiale <strong><a href="https://status.claude.com/">status.claude.com</a></strong> mostra in tempo reale lo stato operativo di tutti i servizi Anthropic/Claude.</p>
-<h2 id="servizi-monitorati">Servizi monitorati</h2>
-<table>
-<thead>
-<tr>
-<th>Servizio</th>
-<th>URL</th>
-<th>Uptime (90gg)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>claude.ai</td>
-<td>Piattaforma web</td>
-<td>~98.9%</td>
-</tr>
-<tr>
-<td>platform.claude.com</td>
-<td>Console e gestione API</td>
-<td>~99.3%</td>
-</tr>
-<tr>
-<td>Claude API</td>
-<td>api.anthropic.com</td>
-<td>~99.0%</td>
-</tr>
-<tr>
-<td>Claude Code</td>
-<td>Editor integrato</td>
-<td>~99.3%</td>
-</tr>
-<tr>
-<td>Claude for Government</td>
-<td>Versione governativa</td>
-<td>~99.9%</td>
-</tr>
-</tbody>
-</table>
-<h2 id="stati-possibili">Stati possibili</h2>
-<table>
-<thead>
-<tr>
-<th>Stato</th>
-<th>Significato</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Operational</strong></td>
-<td>Funzionamento normale</td>
-</tr>
-<tr>
-<td><strong>Degraded Performance</strong></td>
-<td>Rallentamenti o latenza elevata</td>
-</tr>
-<tr>
-<td><strong>Partial Outage</strong></td>
-<td>Interruzione parziale del servizio</td>
-</tr>
-<tr>
-<td><strong>Major Outage</strong></td>
-<td>Disservizio significativo</td>
-</tr>
-</tbody>
-</table>
-<h2 id="storico-e-uptime">Storico e uptime</h2>
-<p>La pagina mostra un grafico degli ultimi 90 giorni (selezionabile a 30/60/90 giorni) con indicazione visiva dei periodi di downtime. Ogni incidente è documentato con:
-- Data e durata
-- Livello di impatto (critico, maggiore, minore, manutenzione programmata)
-- Aggiornamenti cronologici durante l'evento</p>
-<h2 id="notifiche">Notifiche</h2>
-<p>È possibile iscriversi agli aggiornamenti di stato tramite:
-- <strong>Email</strong> (verifica OTP)
-- <strong>SMS</strong> (verifica OTP)
-- <strong>Slack</strong> (integrazione workspace)
-- <strong>Microsoft Teams</strong> (webhook)
-- <strong>Webhook personalizzato</strong>
-- <strong>Atom/RSS feed</strong> — utile per integrazioni custom o monitoraggio automatico</p>
-<h2 id="quando-usarla">Quando usarla</h2>
-<ul>
-<li>Se Claude Code non risponde o si comporta in modo anomalo, verifica prima lo stato del servizio</li>
-<li>Prima di aprire un ticket di supporto, controlla se è già un incident noto</li>
-<li>Per monitorare l'affidabilità nel tempo prima di integrare l'API in produzione</li>
-</ul>
-<hr />
-<h1 id="plugin">Plugin</h1>
-<p>I plugin estendono le capacità di Claude Code con workflow, skill e automazioni aggiuntive. Si installano tramite il marketplace integrato.</p>
-<h2 id="installazione-plugin">Installazione plugin</h2>
-<pre><code class="language-bash"># Dal marketplace ufficiale
-/plugin install &lt;nome&gt;@claude-plugins-official
+  </div>
 
-# Da un marketplace custom
-/plugin marketplace add &lt;owner&gt;/&lt;marketplace-repo&gt;
-/plugin install &lt;nome&gt;@&lt;marketplace&gt;
+  <script>
+  (function () {
+    var sidebar = document.getElementById('sidebar');
+    var btn     = document.getElementById('sidebar-toggle');
 
-# Aggiornamento
-/plugin update &lt;nome&gt;
-</code></pre>
-<h2 id="plugin-documentati">Plugin documentati</h2>
-<table>
-<thead>
-<tr>
-<th>Plugin</th>
-<th>Descrizione</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="plugin/superpowers.md">Superpowers</a></td>
-<td>Framework agentico con skill per TDD, debugging sistematico, pianificazione e code review</td>
-</tr>
-<tr>
-<td><a href="plugin/claude-mem.md">Claude-Mem</a></td>
-<td>Memoria persistente tra sessioni con compressione AI e ricerca semantica</td>
-</tr>
-<tr>
-<td><a href="plugin/claude-hud.md">Claude HUD</a></td>
-<td>Dashboard visiva nel terminale: contesto, strumenti, agenti, git, usage</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h1 id="analisi-claude-token-efficient">Analisi: claude-token-efficient</h1>
-<table>
-<thead>
-<tr>
-<th>Campo</th>
-<th>Valore</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Repo</strong></td>
-<td>https://github.com/drona23/claude-token-efficient</td>
-</tr>
-<tr>
-<td><strong>Autore</strong></td>
-<td>Drona Gangarapu</td>
-</tr>
-<tr>
-<td><strong>Stelle</strong></td>
-<td>~988</td>
-</tr>
-<tr>
-<td><strong>Data analisi</strong></td>
-<td>31 marzo 2026</td>
-</tr>
-</tbody>
-</table>
-<h2 id="descrizione">Descrizione</h2>
-<p>Repository che fornisce un file <code>CLAUDE.md</code> "drop-in" da inserire nella root di qualsiasi progetto per ridurre la verbosità dell'output di Claude Code di circa il 63%, senza modifiche al codice.</p>
-<h2 id="problema-affrontato">Problema affrontato</h2>
-<p>Claude Code, per default, ha diversi comportamenti che sprecano token in output:</p>
-<ol>
-<li><strong>Aperture adulatorie</strong> ("Sure!", "Great question!", "Absolutely!")</li>
-<li><strong>Chiusure vuote</strong> ("I hope this helps!", "Let me know if you need anything!")</li>
-<li><strong>Riformulazione della domanda</strong> prima di rispondere</li>
-<li><strong>Em dash, smart quotes, caratteri Unicode</strong> che rompono i parser</li>
-<li><strong>Frasi tipo "As an AI..."</strong></li>
-<li><strong>Disclaimer non necessari</strong></li>
-<li><strong>Suggerimenti non richiesti</strong> che vanno oltre lo scope della domanda</li>
-<li><strong>Over-engineering del codice</strong> con astrazioni inutili</li>
-<li><strong>Allucinazioni</strong> su fatti incerti invece di ammettere di non sapere</li>
-<li><strong>Ignorare correzioni dell'utente</strong> (sycophancy: "You're absolutely right!")</li>
-<li><strong>Letture ridondanti di file</strong> già letti</li>
-<li><strong>Scope creep</strong> (modificare codice fuori dall'ambito della richiesta)</li>
-</ol>
-<h2 id="soluzione-proposta-claudemd-universale">Soluzione proposta: CLAUDE.md universale</h2>
-<p>Il file CLAUDE.md del repo è estremamente conciso (~15 righe) con queste regole:</p>
-<ul>
-<li><strong>Prima di scrivere codice</strong>: leggere tutti i file rilevanti, capire il requisito completo</li>
-<li><strong>Durante la scrittura</strong>: testare, correggere errori subito, preferire edit a riscritture, soluzione più semplice possibile</li>
-<li><strong>Prima di dichiarare "fatto"</strong>: eseguire il codice un'ultima volta, mai dichiarare fatto senza un test che passa</li>
-<li><strong>Output</strong>: niente aperture adulatorie, niente chiusure vuote, niente em dash/smart quotes/Unicode (solo ASCII), essere concisi, dire "non lo so" se incerti</li>
-<li><strong>Regola override</strong>: le istruzioni esplicite dell'utente vincono sempre su questo file</li>
-</ul>
-<h2 id="benchmark">Benchmark</h2>
-<p>Testato su 5 prompt identici con e senza CLAUDE.md:</p>
-<table>
-<thead>
-<tr>
-<th>Test</th>
-<th>Senza</th>
-<th>Con</th>
-<th>Riduzione</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Spiegare async/await</td>
-<td>180 parole</td>
-<td>65 parole</td>
-<td>64%</td>
-</tr>
-<tr>
-<td>Code review</td>
-<td>120 parole</td>
-<td>30 parole</td>
-<td>75%</td>
-</tr>
-<tr>
-<td>Cos'è una REST API</td>
-<td>110 parole</td>
-<td>55 parole</td>
-<td>50%</td>
-</tr>
-<tr>
-<td>Correzione allucinazione</td>
-<td>55 parole</td>
-<td>20 parole</td>
-<td>64%</td>
-</tr>
-<tr>
-<td><strong>Media</strong></td>
-<td></td>
-<td></td>
-<td><strong>~63%</strong></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Proiezione a scala</strong>: con 1000 prompt/giorno si risparmiano circa 96.000 token e ~$8.64/mese (Sonnet).</p>
-<p><strong>Nota importante</strong>: il file CLAUDE.md stesso consuma token di input ad ogni messaggio. Il risparmio netto è positivo solo quando il volume di output è sufficientemente alto da compensare il costo di input persistente.</p>
-<h2 id="profili-specializzati">Profili specializzati</h2>
-<p>Il repo include 3 profili aggiuntivi:</p>
-<h3 id="profilo-coding-profilesclaudecodingmd">Profilo Coding (<code>profiles/CLAUDE.coding.md</code>)</h3>
-<ul>
-<li>Codice prima, spiegazione dopo (solo se non ovvia)</li>
-<li>Niente boilerplate, niente astrazioni premature</li>
-<li>Niente docstring o type annotation su codice non modificato</li>
-<li>Review: indica il bug, mostra il fix, stop</li>
-<li>Debug: mai speculare senza leggere il codice, ammettere se la causa è incerta</li>
-<li>"Tre righe simili sono meglio di un'astrazione prematura"</li>
-</ul>
-<h3 id="profilo-agents-profilesclaudeagentsmd">Profilo Agents (<code>profiles/CLAUDE.agents.md</code>)</h3>
-<ul>
-<li>Output solo strutturato: JSON, bullet, tabelle</li>
-<li>Nessuna narrazione ("Now I will...", "I have completed...")</li>
-<li>Nessuna richiesta di conferma su task chiaramente definiti</li>
-<li>Mai inventare path, endpoint, nomi di funzioni</li>
-<li>Se un valore è sconosciuto: restituire null o "UNKNOWN"</li>
-</ul>
-<h3 id="profilo-analysis-profilesclaudeanalysismd">Profilo Analysis (<code>profiles/CLAUDE.analysis.md</code>)</h3>
-<ul>
-<li>Risultato principale prima, contesto e metodologia dopo</li>
-<li>Numeri sempre con unità di misura e fonte</li>
-<li>Distinguere chiaramente tra dati e inferenze</li>
-<li>Formato report: sommario (max 3 bullet), dati di supporto, limiti/caveat</li>
-</ul>
-<h2 id="consigli-dalla-community">Consigli dalla community</h2>
-<ol>
-<li><strong>Regole specifiche battono regole generiche</strong>: invece di "sii conciso", meglio "quando uno step fallisce, fermati immediatamente e riporta l'errore completo con traceback prima di tentare qualsiasi fix"</li>
-<li><strong>I file CLAUDE.md si compongono</strong>: Claude legge file a più livelli simultaneamente (globale + progetto + sottodirectory)</li>
-</ol>
-<h2 id="quando-usarlo-e-quando-no">Quando usarlo e quando no</h2>
-<p><strong>Utile per</strong>:
-- Pipeline di automazione con alto volume di output
-- Task strutturati ripetuti (bot, agent loop, generazione codice)
-- Team che necessitano output consistente e parsabile</p>
-<p><strong>Non utile per</strong>:
-- Query singole e brevi (il file in input costa più del risparmio in output)
-- Uso casuale occasionale
-- Lavoro esplorativo dove alternative e discussione sono il punto</p>
-<h2 id="informazioni-integrate-nella-documentazione">Informazioni integrate nella documentazione</h2>
-<ul>
-<li>→ <a href="../tips-e-tricks.md">tips-e-tricks.md</a>: regole anti-verbosità, workflow efficace, nota sul costo del CLAUDE.md</li>
-<li>→ <a href="../claude-md.md">claude-md.md</a>: composizione multi-livello, regole specifiche vs generiche, profili specializzati</li>
-<li>→ <a href="../limiti-e-pricing.md">limiti-e-pricing.md</a>: benchmark risparmio token</li>
-</ul>
-<hr />
-<h1 id="analisi-chiedi-allai-di-analizzare-come-le-parli">Analisi: Chiedi all'AI di analizzare come le parli</h1>
-<table>
-<thead>
-<tr>
-<th>Campo</th>
-<th>Valore</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>URL</strong></td>
-<td>https://www.ai-know.pro/chiedi-allai-di-analizzare-come-le-parli-un-metodo-pratico/</td>
-</tr>
-<tr>
-<td><strong>Fonte</strong></td>
-<td>ai-know.pro</td>
-</tr>
-<tr>
-<td><strong>Data analisi</strong></td>
-<td>31 marzo 2026</td>
-</tr>
-</tbody>
-</table>
-<h2 id="concetto-centrale">Concetto centrale</h2>
-<p>L'articolo propone un metodo pratico per migliorare la comunicazione con l'AI: <strong>chiedere all'AI stessa di analizzare le tue conversazioni</strong> per identificare pattern comunicativi ricorrenti, sia efficaci che inefficaci. Le conversazioni contengono informazioni implicite sul tuo stile comunicativo che normalmente restano inesplorate.</p>
-<h2 id="perche-e-diverso-dal-prompt-engineering-classico">Perché è diverso dal prompt engineering classico</h2>
-<p>Il prompt engineering tradizionale offre regole generiche ("sii specifico", "fornisci contesto", "usa esempi"). Questo metodo produce un'<strong>analisi personalizzata ancorata alle interazioni reali</strong>, rivelando pattern nel modo in cui:
-- Si strutturano le richieste
-- Si fornisce feedback
-- Si sequenziano le informazioni</p>
-<h2 id="il-metodo-passo-per-passo">Il metodo passo per passo</h2>
-<h3 id="1-quando-fare-la-richiesta-di-analisi">1. Quando fare la richiesta di analisi</h3>
-<p>Alla fine di <strong>sessioni di lavoro sostanziali e variegate</strong>. Le sessioni migliori sono quelle in cui si costruisce qualcosa insieme (codice, documenti, progetti) con errori, correzioni e cambi di direzione. Sessioni di semplice Q&amp;A producono materiale meno ricco.</p>
-<h3 id="2-come-formulare-la-richiesta">2. Come formulare la richiesta</h3>
-<p>Con una frase semplice come:</p>
-<blockquote>
-<p><em>"Analizza come faccio le richieste in questa conversazione, evidenziando sia i punti efficaci che quelli deboli."</em></p>
-</blockquote>
-<h3 id="3-perche-chiedere-sia-punti-di-forza-che-debolezze">3. Perché chiedere sia punti di forza che debolezze</h3>
-<ul>
-<li>Chiedere solo i punti di forza → genera elogi generici</li>
-<li>Chiedere solo le debolezze → produce critiche decontestualizzate</li>
-<li>L'analisi combinata fornisce una prospettiva realmente azionabile</li>
-</ul>
-<h2 id="limitazioni-per-piattaforma">Limitazioni per piattaforma</h2>
-<table>
-<thead>
-<tr>
-<th>Piattaforma</th>
-<th>Efficacia</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Chat (Claude)</td>
-<td>Buona</td>
-<td>Finestra di contesto di 200.000 token</td>
-</tr>
-<tr>
-<td>Claude Code (con Opus)</td>
-<td>Molto efficace</td>
-<td>Finestra di 1 milione di token</td>
-</tr>
-<tr>
-<td>Cowork</td>
-<td>Problematico</td>
-<td>Conversazioni troncate dopo pochi scambi</td>
-</tr>
-</tbody>
-</table>
-<h2 id="esempio-di-risultati">Esempio di risultati</h2>
-<p>L'autore riporta un caso di studio personale:</p>
-<p><strong>Punti di forza identificati:</strong>
-- Testare le modifiche e riportare risultati esatti (log, screenshot)
-- Mettere in discussione le proposte dell'AI con ragionamento pratico
-- Mantenere il focus sulla prospettiva dell'utente finale</p>
-<p><strong>Punti deboli identificati:</strong>
-- Comprimere più richieste non correlate in un singolo messaggio
-- Fornire vincoli e contesto <em>dopo</em> la richiesta operativa anziché <em>prima</em></p>
-<h2 id="ripetibilita">Ripetibilità</h2>
-<p>Il metodo è pensato per essere riutilizzato nel tempo, permettendo di monitorare l'evoluzione dei propri pattern comunicativi. In pratica diventa un ciclo di auto-miglioramento continuo.</p>
-<h2 id="consigli-azionabili">Consigli azionabili</h2>
-<table>
-<thead>
-<tr>
-<th>Cosa fare</th>
-<th>Dettaglio</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Scegliere la sessione giusta</td>
-<td>Sessioni collaborative complesse, non semplici Q&amp;A</td>
-</tr>
-<tr>
-<td>Formulare la richiesta</td>
-<td>Chiedere analisi di punti forti E deboli insieme</td>
-</tr>
-<tr>
-<td>Piattaforma migliore</td>
-<td>Claude Code con Opus (1M token) per contesto più ampio</td>
-</tr>
-<tr>
-<td>Applicare le correzioni</td>
-<td>Fornire contesto/vincoli PRIMA della richiesta operativa; non accorpare richieste non correlate</td>
-</tr>
-<tr>
-<td>Ripetere periodicamente</td>
-<td>Rifare l'analisi a distanza di settimane per verificare i progressi</td>
-</tr>
-</tbody>
-</table>
-<h2 id="informazioni-integrate-nella-documentazione_1">Informazioni integrate nella documentazione</h2>
-<ul>
-<li>→ <a href="../prompting.md">prompting.md</a>: metodo di auto-analisi, best practice su struttura delle richieste</li>
-</ul>
-  </main>
+    function setCollapsed(collapsed) {
+      sidebar.classList.toggle('collapsed', collapsed);
+      btn.textContent = collapsed ? '▶' : '◀';
+      btn.title       = collapsed ? 'Mostra indice' : 'Nascondi indice';
+      localStorage.setItem('toc-collapsed', collapsed);
+    }
+
+    btn.addEventListener('click', function () {
+      setCollapsed(!sidebar.classList.contains('collapsed'));
+    });
+
+    var saved = localStorage.getItem('toc-collapsed');
+    if (saved === 'true') setCollapsed(true);
+    if (saved === null && window.innerWidth < 768) setCollapsed(true);
+  })();
+  </script>
 </body>
 </html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$title$</title>
+  $for(css)$<link rel="stylesheet" href="$css$">$endfor$
+</head>
+<body>
+  <div id="layout">
+
+    <aside id="sidebar">
+      <button id="sidebar-toggle" title="Nascondi indice">◀</button>
+      <div id="sidebar-body">
+$if(toc)$
+        $table-of-contents$
+$endif$
+      </div>
+    </aside>
+
+    <main id="content">
+      <header id="doc-header">
+        <h1 id="doc-title">$title$</h1>
+        <p id="doc-subtitle">Documentazione personale sull'uso di Claude Code</p>
+      </header>
+      $body$
+    </main>
+
+  </div>
+
+  <script>
+  (function () {
+    var sidebar = document.getElementById('sidebar');
+    var btn     = document.getElementById('sidebar-toggle');
+
+    function setCollapsed(collapsed) {
+      sidebar.classList.toggle('collapsed', collapsed);
+      btn.textContent = collapsed ? '▶' : '◀';
+      btn.title       = collapsed ? 'Mostra indice' : 'Nascondi indice';
+      localStorage.setItem('toc-collapsed', collapsed);
+    }
+
+    btn.addEventListener('click', function () {
+      setCollapsed(!sidebar.classList.contains('collapsed'));
+    });
+
+    var saved = localStorage.getItem('toc-collapsed');
+    if (saved === 'true') setCollapsed(true);
+    if (saved === null && window.innerWidth < 768) setCollapsed(true);
+  })();
+  </script>
+</body>
+</html>

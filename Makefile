@@ -8,5 +8,5 @@ clean:
 	@echo "✓ Pulito"
 
 setup:
-	@pip3 install --break-system-packages markdown -q && echo "✓ Dipendenza 'markdown' installata"
+	@which pandoc > /dev/null || (echo "Installa pandoc con: brew install pandoc" && exit 1)
 	@git config core.hooksPath .githooks && echo "✓ Git hooks configurati (.githooks/)"
