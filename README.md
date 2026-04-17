@@ -24,6 +24,7 @@ Report di analisi di repository e risorse esterne da cui sono state estratte inf
 
 - [claude-token-efficient](docs/fonti-esterne/claude-token-efficient.md) — Ottimizzazione token e riduzione verbosità (~63%)
 - [analisi-come-parli-allai](docs/fonti-esterne/analisi-come-parli-allai.md) — Auto-analisi del proprio stile di prompting
+- [claude-config-audit](docs/fonti-esterne/claude-config-audit.md) — Skill per audit configurazione Claude (MCP, plugin, skill, prompt, memoria)
 
 ---
 

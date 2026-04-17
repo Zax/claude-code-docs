@@ -117,6 +117,12 @@ Claude Code include alcune skill predefinite:
 - Durante la compattazione automatica, le prime 5.000 token per skill vengono preservate (max 25.000 token totali tra tutte le skill)
 - Per aumentare il budget: variabile d'ambiente `SLASH_COMMAND_TOOL_CHAR_BUDGET`
 
+## Skill documentate
+
+| Skill | Descrizione |
+|-------|-------------|
+| [Claude Config Audit](fonti-esterne/claude-config-audit.md) | Audit sistematico della configurazione Claude: MCP duplicati, plugin inutilizzati, conflitti, spreco token e RAM |
+
 ## Risorse
 
 - [Documentazione ufficiale](https://code.claude.com/docs/en/skills)
