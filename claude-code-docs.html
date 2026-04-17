@@ -356,6 +356,30 @@ pre { font-size: .8em; }
         guida</a></li>
         <li><a href="#risorse-1" id="toc-risorse-1">Risorse</a></li>
         </ul></li>
+        <li><a href="#skill" id="toc-skill">Skill</a>
+        <ul>
+        <li><a href="#dove-si-salvano" id="toc-dove-si-salvano">Dove si
+        salvano</a></li>
+        <li><a href="#formato-di-skillmd" id="toc-formato-di-skillmd">Formato di SKILL.md</a>
+        <ul>
+        <li><a href="#campi-frontmatter-obbligatori" id="toc-campi-frontmatter-obbligatori">Campi frontmatter
+        obbligatori</a></li>
+        <li><a href="#campi-opzionali" id="toc-campi-opzionali">Campi
+        opzionali</a></li>
+        <li><a href="#variabili-disponibili-nel-contenuto" id="toc-variabili-disponibili-nel-contenuto">Variabili
+        disponibili nel contenuto</a></li>
+        <li><a href="#comandi-shell-dinamici" id="toc-comandi-shell-dinamici">Comandi shell dinamici</a></li>
+        </ul></li>
+        <li><a href="#come-si-invocano" id="toc-come-si-invocano">Come
+        si invocano</a>
+        <ul>
+        <li><a href="#controllare-chi-invoca" id="toc-controllare-chi-invoca">Controllare chi invoca</a></li>
+        </ul></li>
+        <li><a href="#skill-built-in-vs-custom" id="toc-skill-built-in-vs-custom">Skill built-in vs
+        custom</a></li>
+        <li><a href="#gestione-del-contesto" id="toc-gestione-del-contesto">Gestione del contesto</a></li>
+        <li><a href="#risorse-2" id="toc-risorse-2">Risorse</a></li>
+        </ul></li>
         </ul>
       </div>
     </aside>
@@ -1750,6 +1774,288 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       <ul>
       <li>Discord: <a href="https://discord.gg/Jd8Vphy9jq">https://discord.gg/Jd8Vphy9jq</a></li>
       <li>Issues: <a href="https://github.com/obra/superpowers/issues">https://github.com/obra/superpowers/issues</a></li>
+      </ul>
+      <hr />
+      <h1 id="skill">Skill</h1>
+      <p>Le skill sono istruzioni modulari che estendono le capacità di
+      Claude Code. Seguono lo standard aperto <strong>Agent
+      Skills</strong> (adottato anche da OpenAI, GitHub Copilot, Cursor,
+      Figma) e funzionano con un meccanismo di <strong>progressive
+      disclosure</strong>: solo il nome e la descrizione (~100 token)
+      vengono caricati all&#39;avvio; il contenuto completo si carica solo
+      quando la skill viene invocata.</p>
+      <h2 id="dove-si-salvano">Dove si salvano</h2>
+      <p>Le skill si possono definire a tre livelli:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Livello</th>
+      <th>Percorso</th>
+      <th>Ambito</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Personale</td>
+      <td><code>~/.claude/skills/&lt;nome&gt;/SKILL.md</code></td>
+      <td>Tutti i progetti</td>
+      </tr>
+      <tr>
+      <td>Progetto</td>
+      <td><code>.claude/skills/&lt;nome&gt;/SKILL.md</code></td>
+      <td>Solo il progetto corrente</td>
+      </tr>
+      <tr>
+      <td>Enterprise</td>
+      <td>Managed settings</td>
+      <td>Tutta l&#39;organizzazione</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>Struttura tipica di una skill:</p>
+      <pre><code>~/.claude/skills/my-skill/
+├── SKILL.md              # Obbligatorio: frontmatter + istruzioni
+├── scripts/              # Opzionale: script eseguibili
+├── references/           # Opzionale: documentazione di supporto
+└── assets/               # Opzionale: template, risorse</code></pre>
+      <blockquote>
+      <p><strong>Nota</strong>: il nome della cartella deve
+      corrispondere al campo <code>name</code> nel frontmatter. Solo
+      lettere minuscole, numeri e trattini (max 64 caratteri).</p>
+      </blockquote>
+      <p>Claude Code rileva automaticamente le modifiche ai file skill
+      senza dover riavviare la sessione. In monorepo, le skill vengono
+      scoperte anche nelle sottodirectory (es.
+      <code>packages/frontend/.claude/skills/</code>).</p>
+      <h2 id="formato-di-skillmd">Formato di SKILL.md</h2>
+      <p>Il file è composto da frontmatter YAML + corpo markdown:</p>
+      <div class="sourceCode" id="cb30"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> explain-code</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Spiega il codice con diagrammi e analogie. Usalo quando chiedi &quot;come funziona questo codice?&quot;</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="fu">Quando spieghi del codice, includi sempre</span><span class="kw">:</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="fu">1. **Analogia**</span><span class="kw">:</span><span class="at"> paragona il codice a qualcosa di quotidiano</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">2. **Diagramma**</span><span class="kw">:</span><span class="at"> usa ASCII art per mostrare il flusso</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="fu">3. **Walkthrough**</span><span class="kw">:</span><span class="at"> spiega passo per passo cosa succede</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="fu">4. **Gotcha**</span><span class="kw">:</span><span class="at"> qual è l&#39;errore comune o il malinteso tipico?</span></span></code></pre></div>
+      <h3 id="campi-frontmatter-obbligatori">Campi frontmatter
+      obbligatori</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Campo</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>name</code></td>
+      <td>Nome della skill (diventa il comando <code>/nome</code>). Solo
+      minuscole, numeri, trattini.</td>
+      </tr>
+      <tr>
+      <td><code>description</code></td>
+      <td>Cosa fa e quando usarla (1-1024 caratteri). Claude lo usa per
+      decidere se invocare la skill automaticamente. <strong>Deve stare
+      su una sola riga.</strong></td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="campi-opzionali">Campi opzionali</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Campo</th>
+      <th>Tipo</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>when_to_use</code></td>
+      <td>string</td>
+      <td>Contesto aggiuntivo su quando invocare la skill</td>
+      </tr>
+      <tr>
+      <td><code>argument-hint</code></td>
+      <td>string</td>
+      <td>Hint nell&#39;autocomplete (es. <code>[issue-number]</code>)</td>
+      </tr>
+      <tr>
+      <td><code>disable-model-invocation</code></td>
+      <td>boolean</td>
+      <td>Se <code>true</code>, solo l&#39;utente può invocarla (non
+      Claude)</td>
+      </tr>
+      <tr>
+      <td><code>user-invocable</code></td>
+      <td>boolean</td>
+      <td>Se <code>false</code>, nasconde dal menu <code>/</code> (solo
+      Claude la invoca)</td>
+      </tr>
+      <tr>
+      <td><code>allowed-tools</code></td>
+      <td>string/list</td>
+      <td>Tool permessi senza chiedere conferma (es.
+      <code>Read Grep Bash(git *)</code>)</td>
+      </tr>
+      <tr>
+      <td><code>model</code></td>
+      <td>string</td>
+      <td>Modello da usare quando la skill è attiva</td>
+      </tr>
+      <tr>
+      <td><code>effort</code></td>
+      <td>string</td>
+      <td>Livello di effort: <code>low</code>, <code>medium</code>,
+      <code>high</code>, <code>xhigh</code>, <code>max</code></td>
+      </tr>
+      <tr>
+      <td><code>context</code></td>
+      <td>string</td>
+      <td><code>fork</code> per eseguire in un subagent isolato</td>
+      </tr>
+      <tr>
+      <td><code>agent</code></td>
+      <td>string</td>
+      <td>Tipo di subagent: <code>Explore</code>, <code>Plan</code>,
+      <code>general-purpose</code></td>
+      </tr>
+      <tr>
+      <td><code>paths</code></td>
+      <td>string/list</td>
+      <td>Glob pattern per limitare quando la skill si attiva (es.
+      <code>src/**/*.ts</code>)</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="variabili-disponibili-nel-contenuto">Variabili disponibili
+      nel contenuto</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Variabile</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>$ARGUMENTS</code></td>
+      <td>Tutti gli argomenti passati all&#39;invocazione</td>
+      </tr>
+      <tr>
+      <td><code>$0</code>, <code>$1</code>, <code>$2</code>...</td>
+      <td>Argomento specifico per indice</td>
+      </tr>
+      <tr>
+      <td><code>${CLAUDE_SESSION_ID}</code></td>
+      <td>ID della sessione corrente</td>
+      </tr>
+      <tr>
+      <td><code>${CLAUDE_SKILL_DIR}</code></td>
+      <td>Directory della skill</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="comandi-shell-dinamici">Comandi shell dinamici</h3>
+      <p>Con la sintassi <code>!`&lt;comando&gt;`</code> si possono
+      eseguire comandi shell il cui output viene iniettato nel contenuto
+      della skill prima di inviarlo a Claude (preprocessing, non
+      esecuzione da parte di Claude).</p>
+      <h2 id="come-si-invocano">Come si invocano</h2>
+      <p><strong>Manualmente</strong>: digitare <code>/nome-skill</code>
+      nella chat, con argomenti opzionali (es.
+      <code>/fix-issue 123</code>). Il menu autocomplete mostra tutte le
+      skill disponibili.</p>
+      <p><strong>Automaticamente</strong>: Claude può invocare una skill
+      quando la richiesta corrisponde alla sua <code>description</code>,
+      senza che l&#39;utente la chiami esplicitamente.</p>
+      <h3 id="controllare-chi-invoca">Controllare chi invoca</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Configurazione</th>
+      <th>Effetto</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Default</td>
+      <td>Sia l&#39;utente che Claude possono invocare</td>
+      </tr>
+      <tr>
+      <td><code>disable-model-invocation: true</code></td>
+      <td>Solo l&#39;utente (utile per <code>/deploy</code>,
+      <code>/commit</code>)</td>
+      </tr>
+      <tr>
+      <td><code>user-invocable: false</code></td>
+      <td>Solo Claude (conoscenza di background, non un comando)</td>
+      </tr>
+      </tbody>
+      </table>
+      <h2 id="skill-built-in-vs-custom">Skill built-in vs custom</h2>
+      <p>Claude Code include alcune skill predefinite:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Skill</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><code>/simplify</code></td>
+      <td>Rivede il codice per qualità, riuso ed efficienza</td>
+      </tr>
+      <tr>
+      <td><code>/loop</code></td>
+      <td>Esegue un prompt/comando a intervalli regolari</td>
+      </tr>
+      <tr>
+      <td><code>/claude-api</code></td>
+      <td>Aiuto per costruire app con Claude API</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p><strong>Differenza con i comandi</strong>: comandi come
+      <code>/help</code>, <code>/compact</code>, <code>/clear</code>
+      sono logica integrata nel CLI. Le skill sono basate su prompt e
+      Claude le orchestra usando i tool disponibili.</p>
+      </blockquote>
+      <blockquote>
+      <p><strong>Legacy</strong>: i file in
+      <code>.claude/commands/</code> continuano a funzionare ma le skill
+      sono preferite perché supportano frontmatter, file di supporto e
+      invocazione automatica.</p>
+      </blockquote>
+      <h2 id="gestione-del-contesto">Gestione del contesto</h2>
+      <ul>
+      <li>Le descrizioni delle skill condividono un budget di contesto
+      (1% della finestra, minimo 8.000 caratteri)</li>
+      <li>Quando ci sono molte skill, le descrizioni vengono accorciate
+      automaticamente</li>
+      <li>Il contenuto completo di una skill, una volta invocata, resta
+      nella conversazione per il resto della sessione</li>
+      <li>Durante la compattazione automatica, le prime 5.000 token per
+      skill vengono preservate (max 25.000 token totali tra tutte le
+      skill)</li>
+      <li>Per aumentare il budget: variabile d&#39;ambiente
+      <code>SLASH_COMMAND_TOOL_CHAR_BUDGET</code></li>
+      </ul>
+      <h2 id="risorse-2">Risorse</h2>
+      <ul>
+      <li><a href="https://code.claude.com/docs/en/skills">Documentazione
+      ufficiale</a></li>
+      <li><a href="https://agentskills.io/specification">Agent Skills
+      Specification</a></li>
+      <li><a href="https://github.com/anthropics/skills">Repository
+      skill ufficiali Anthropic</a></li>
+      <li><a href="https://github.com/travisvn/awesome-claude-skills">Awesome
+      Claude Skills</a> (community)</li>
       </ul>
     </main>
 

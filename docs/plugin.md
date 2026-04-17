@@ -28,4 +28,4 @@ I plugin estendono le capacità di Claude Code con workflow, skill e automazioni
 
 ---
 
-[← Link Utili](link-utili.md)
+[← Link Utili](link-utili.md) | [Successivo: Skill →](skills.md)

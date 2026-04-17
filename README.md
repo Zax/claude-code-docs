@@ -16,6 +16,7 @@ Raccolta di informazioni utili, best practice e risorse per l'uso efficace di Cl
 8. [Link Utili](docs/link-utili.md) — Risorse e riferimenti esterni
 9. [Stato del Servizio](docs/status.md) — Monitoraggio uptime e incident
 10. [Plugin](docs/plugin.md) — Plugin per estendere Claude Code
+11. [Skill](docs/skills.md) — Istruzioni modulari per estendere Claude Code
 
 ## Fonti esterne analizzate
 
