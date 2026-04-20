@@ -6,26 +6,55 @@
 
 | Modello | ID API | Contesto | Output max | Prezzo (input/output per MTok) |
 |---------|--------|----------|------------|-------------------------------|
-| Claude Opus 4.6 | `claude-opus-4-6` | 1M token | 128k | $5 / $25 |
+| Claude Opus 4.7 | `claude-opus-4-7` | 1M token | 128k | $5 / $25 |
 | Claude Sonnet 4.6 | `claude-sonnet-4-6` | 1M token | 64k | $3 / $15 |
 | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | 200k token | 64k | $1 / $5 |
 
-> Knowledge cutoff: Opus 4.6 → mag 2025, Sonnet 4.6 → ago 2025, Haiku 4.5 → feb 2025
+| | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
+|--|----------|------------|-----------|
+| **Knowledge cutoff** | gen 2026 | ago 2025 | feb 2025 |
+| **Training data cutoff** | gen 2026 | gen 2026 | lug 2025 |
+
+---
+
+## Opus 4.7 — Novità rispetto a Opus 4.6
+
+Claude Opus 4.7 è il modello più capace attualmente disponibile, con un **miglioramento significativo nell'agentic coding** rispetto a Opus 4.6.
+
+### Cosa cambia
+
+| Aspetto | Opus 4.6 | Opus 4.7 |
+|---------|----------|----------|
+| Agentic coding | Buono | **Step-change improvement** |
+| Extended thinking | Sì | **No** (rimosso) |
+| Adaptive thinking | Sì | Sì |
+| Knowledge cutoff | mag 2025 | **gen 2026** |
+| Training data cutoff | ago 2025 | **gen 2026** |
+| Tokenizer | Standard (~750k parole/1M token) | **Nuovo** (~555k parole/1M token) |
+| Prezzo | $5 / $25 | $5 / $25 (invariato) |
+
+### Punti chiave
+
+- **Agentic coding**: Opus 4.7 ha un salto qualitativo nella capacità di pianificare, eseguire e iterare autonomamente su task di coding complessi. È progettato per l'uso con Claude Code e workflow agentici.
+- **Extended thinking rimosso**: Opus 4.7 **non supporta** più extended thinking (`type: "enabled"` con `budget_tokens`). Usa solo adaptive thinking, dove il modello decide autonomamente quanto ragionare.
+- **Nuovo tokenizer**: il tokenizer di Opus 4.7 è diverso dai modelli precedenti. A parità di 1M token di contesto, copre ~555k parole anziché ~750k. Questo significa che lo stesso testo occupa più token rispetto a Opus 4.6/Sonnet 4.6.
+- **Opus 4.6 è ora legacy**: resta disponibile ma non consigliato per nuovi progetti.
 
 ---
 
 ## Casi d'uso consigliati
 
-### Claude Opus 4.6 — Massima intelligenza
-Il modello più capace. Da usare quando la qualità del risultato conta più del costo o della velocità.
+### Claude Opus 4.7 — Massima intelligenza e agentic coding
 
+Il modello più capace. Da usare quando la qualità del risultato conta più del costo o della velocità, specialmente per task agentici.
+
+- Agentic coding con pianificazione autonoma e iterazione su task complessi
 - Ragionamento multi-step complesso (matematica, logica, strategia)
 - Analisi approfondita di documenti lunghi (fino a 1M token di contesto)
-- Scrittura creativa di alta qualità
-- Ricerca e sintesi su argomenti tecnici complessi
-- Agentic tasks con pianificazione autonoma e uso di strumenti
 - Coding su codebase grandi con molte dipendenze da tenere a mente
 - Revisione critica di architetture e decisioni di design
+- Scrittura creativa di alta qualità
+- Ricerca e sintesi su argomenti tecnici complessi
 
 **Quando NON usarlo**: task semplici e ripetitivi, elaborazioni in batch ad alto volume, applicazioni real-time dove la latenza è critica.
 
@@ -42,7 +71,7 @@ Il punto di equilibrio ideale per la maggior parte dei casi d'uso professionali.
 - Assistente per ricerca e summarization
 - Ideale per Claude Code nell'uso quotidiano
 
-**Nota**: supporta *adaptive thinking* (ragionamento adattivo) insieme a Opus 4.6.
+**Nota**: supporta sia *extended thinking* che *adaptive thinking*.
 
 ---
 
@@ -61,14 +90,14 @@ Il modello più rapido ed economico. Ottimo per task ad alto volume o con latenz
 
 ## Funzionalità per modello
 
-| Funzionalità | Opus 4.6 | Sonnet 4.6 | Haiku 4.5 |
+| Funzionalità | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
 |--------------|:--------:|:----------:|:---------:|
-| Extended thinking | ✓ | ✓ | ✓ |
+| Extended thinking | — | ✓ | ✓ |
 | Adaptive thinking | ✓ | ✓ | — |
 | Contesto 1M token | ✓ | ✓ | — |
 | Batch API 300k output | ✓ | ✓ | — |
 
-**Extended thinking**: il modello ragiona passo per passo prima di rispondere (visibile nel "thinking block"). Migliora le prestazioni su task complessi.
+**Extended thinking**: il modello ragiona passo per passo prima di rispondere (visibile nel "thinking block"). Migliora le prestazioni su task complessi. **Non disponibile su Opus 4.7**.
 
 **Adaptive thinking**: il modello decide autonomamente quanto pensare in base alla difficoltà del task.
 
@@ -76,16 +105,17 @@ Il modello più rapido ed economico. Ottimo per task ad alto volume o con latenz
 
 ## Modelli legacy
 
-Disponibili ma non consigliati per nuovi progetti. Usa le versioni 4.x sopra.
+Disponibili ma non consigliati per nuovi progetti. Usa i modelli attuali sopra.
 
 | Modello | ID API | Note |
 |---------|--------|------|
-| Claude Opus 4.5 | `claude-opus-4-5-20251101` | Predecessore di Opus 4.6 |
+| Claude Opus 4.6 | `claude-opus-4-6` | Predecessore di Opus 4.7 |
+| Claude Opus 4.5 | `claude-opus-4-5-20251101` | — |
 | Claude Sonnet 4.5 | `claude-sonnet-4-5-20250929` | Predecessore di Sonnet 4.6 |
 | Claude Opus 4.1 | `claude-opus-4-1-20250805` | — |
-| Claude Sonnet 4 | `claude-sonnet-4-20250514` | — |
-| Claude Opus 4 | `claude-opus-4-20250514` | — |
-| Claude Haiku 3 | `claude-3-haiku-20240307` | Deprecated |
+| Claude Sonnet 4 | `claude-sonnet-4-20250514` | Deprecated, ritiro 15 giu 2026 |
+| Claude Opus 4 | `claude-opus-4-20250514` | Deprecated, ritiro 15 giu 2026 |
+| Claude Haiku 3 | `claude-3-haiku-20240307` | Deprecated, ritiro 19 apr 2026 |
 
 ---
 
@@ -93,16 +123,18 @@ Disponibili ma non consigliati per nuovi progetti. Usa le versioni 4.x sopra.
 
 Alcuni modelli possono "pensare" prima di rispondere, mostrando il ragionamento passo per passo in blocchi separati (`thinking` blocks). Utile per task complessi; da evitare per domande semplici (spreco di token).
 
+> **Nota**: Opus 4.7 **non supporta** extended thinking. Usa solo adaptive thinking.
+
 ### Modalità disponibili
 
-**Adattiva** — consigliata per Opus 4.6 e Sonnet 4.6
+**Adattiva** — disponibile su Opus 4.7, Sonnet 4.6
 Il modello decide autonomamente quanto pensare in base alla complessità del task. Si controlla con il parametro `effort`:
 
 ```python
 thinking={"type": "adaptive", "effort": "high"}  # low | medium | high
 ```
 
-**Manuale** — disponibile su tutti i modelli con extended thinking, deprecata su Opus/Sonnet 4.6
+**Manuale** — disponibile su Sonnet 4.6 e Haiku 4.5, non su Opus 4.7
 Si specifica un budget fisso di token per il ragionamento:
 
 ```python
@@ -132,7 +164,7 @@ In entrambi i casi vieni addebitato per i **token di thinking completi**.
 
 | Modello | Extended thinking | Adaptive thinking |
 |---------|:-----------------:|:-----------------:|
-| Opus 4.6 | ✓ | ✓ |
+| Opus 4.7 | — | ✓ |
 | Sonnet 4.6 | ✓ | ✓ |
 | Haiku 4.5 | ✓ | — |
 

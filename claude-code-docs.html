@@ -231,10 +231,18 @@ pre { font-size: .8em; }
         <ul>
         <li><a href="#modelli-attuali-generazione-4x" id="toc-modelli-attuali-generazione-4x">Modelli attuali
         (generazione 4.x)</a></li>
+        <li><a href="#opus-47--novità-rispetto-a-opus-46" id="toc-opus-47--novità-rispetto-a-opus-46">Opus 4.7 — Novità
+        rispetto a Opus 4.6</a>
+        <ul>
+        <li><a href="#cosa-cambia" id="toc-cosa-cambia">Cosa
+        cambia</a></li>
+        <li><a href="#punti-chiave" id="toc-punti-chiave">Punti
+        chiave</a></li>
+        </ul></li>
         <li><a href="#casi-duso-consigliati" id="toc-casi-duso-consigliati">Casi d&#39;uso consigliati</a>
         <ul>
-        <li><a href="#claude-opus-46--massima-intelligenza" id="toc-claude-opus-46--massima-intelligenza">Claude Opus 4.6 —
-        Massima intelligenza</a></li>
+        <li><a href="#claude-opus-47--massima-intelligenza-e-agentic-coding" id="toc-claude-opus-47--massima-intelligenza-e-agentic-coding">Claude
+        Opus 4.7 — Massima intelligenza e agentic coding</a></li>
         <li><a href="#claude-sonnet-46--miglior-rapporto-qualitàcosto" id="toc-claude-sonnet-46--miglior-rapporto-qualitàcosto">Claude
         Sonnet 4.6 — Miglior rapporto qualità/costo</a></li>
         <li><a href="#claude-haiku-45--velocità-e-basso-costo" id="toc-claude-haiku-45--velocità-e-basso-costo">Claude Haiku
@@ -821,8 +829,8 @@ pre { font-size: .8em; }
       </thead>
       <tbody>
       <tr>
-      <td>Claude Opus 4.6</td>
-      <td><code>claude-opus-4-6</code></td>
+      <td>Claude Opus 4.7</td>
+      <td><code>claude-opus-4-7</code></td>
       <td>1M token</td>
       <td>128k</td>
       <td>$5 / $25</td>
@@ -843,28 +851,120 @@ pre { font-size: .8em; }
       </tr>
       </tbody>
       </table>
-      <blockquote>
-      <p>Knowledge cutoff: Opus 4.6 → mag 2025, Sonnet 4.6 → ago 2025,
-      Haiku 4.5 → feb 2025</p>
-      </blockquote>
+      <table>
+      <thead>
+      <tr>
+      <th></th>
+      <th>Opus 4.7</th>
+      <th>Sonnet 4.6</th>
+      <th>Haiku 4.5</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><strong>Knowledge cutoff</strong></td>
+      <td>gen 2026</td>
+      <td>ago 2025</td>
+      <td>feb 2025</td>
+      </tr>
+      <tr>
+      <td><strong>Training data cutoff</strong></td>
+      <td>gen 2026</td>
+      <td>gen 2026</td>
+      <td>lug 2025</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2 id="opus-47--novità-rispetto-a-opus-46">Opus 4.7 — Novità
+      rispetto a Opus 4.6</h2>
+      <p>Claude Opus 4.7 è il modello più capace attualmente
+      disponibile, con un <strong>miglioramento significativo
+      nell&#39;agentic coding</strong> rispetto a Opus 4.6.</p>
+      <h3 id="cosa-cambia">Cosa cambia</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Aspetto</th>
+      <th>Opus 4.6</th>
+      <th>Opus 4.7</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Agentic coding</td>
+      <td>Buono</td>
+      <td><strong>Step-change improvement</strong></td>
+      </tr>
+      <tr>
+      <td>Extended thinking</td>
+      <td>Sì</td>
+      <td><strong>No</strong> (rimosso)</td>
+      </tr>
+      <tr>
+      <td>Adaptive thinking</td>
+      <td>Sì</td>
+      <td>Sì</td>
+      </tr>
+      <tr>
+      <td>Knowledge cutoff</td>
+      <td>mag 2025</td>
+      <td><strong>gen 2026</strong></td>
+      </tr>
+      <tr>
+      <td>Training data cutoff</td>
+      <td>ago 2025</td>
+      <td><strong>gen 2026</strong></td>
+      </tr>
+      <tr>
+      <td>Tokenizer</td>
+      <td>Standard (~750k parole/1M token)</td>
+      <td><strong>Nuovo</strong> (~555k parole/1M token)</td>
+      </tr>
+      <tr>
+      <td>Prezzo</td>
+      <td>$5 / $25</td>
+      <td>$5 / $25 (invariato)</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="punti-chiave">Punti chiave</h3>
+      <ul>
+      <li><strong>Agentic coding</strong>: Opus 4.7 ha un salto
+      qualitativo nella capacità di pianificare, eseguire e iterare
+      autonomamente su task di coding complessi. È progettato per l&#39;uso
+      con Claude Code e workflow agentici.</li>
+      <li><strong>Extended thinking rimosso</strong>: Opus 4.7
+      <strong>non supporta</strong> più extended thinking
+      (<code>type: &quot;enabled&quot;</code> con <code>budget_tokens</code>). Usa
+      solo adaptive thinking, dove il modello decide autonomamente
+      quanto ragionare.</li>
+      <li><strong>Nuovo tokenizer</strong>: il tokenizer di Opus 4.7 è
+      diverso dai modelli precedenti. A parità di 1M token di contesto,
+      copre ~555k parole anziché ~750k. Questo significa che lo stesso
+      testo occupa più token rispetto a Opus 4.6/Sonnet 4.6.</li>
+      <li><strong>Opus 4.6 è ora legacy</strong>: resta disponibile ma
+      non consigliato per nuovi progetti.</li>
+      </ul>
       <hr />
       <h2 id="casi-duso-consigliati">Casi d&#39;uso consigliati</h2>
-      <h3 id="claude-opus-46--massima-intelligenza">Claude Opus 4.6 —
-      Massima intelligenza</h3>
+      <h3 id="claude-opus-47--massima-intelligenza-e-agentic-coding">Claude
+      Opus 4.7 — Massima intelligenza e agentic coding</h3>
       <p>Il modello più capace. Da usare quando la qualità del risultato
-      conta più del costo o della velocità.</p>
+      conta più del costo o della velocità, specialmente per task
+      agentici.</p>
       <ul>
+      <li>Agentic coding con pianificazione autonoma e iterazione su
+      task complessi</li>
       <li>Ragionamento multi-step complesso (matematica, logica,
       strategia)</li>
       <li>Analisi approfondita di documenti lunghi (fino a 1M token di
       contesto)</li>
-      <li>Scrittura creativa di alta qualità</li>
-      <li>Ricerca e sintesi su argomenti tecnici complessi</li>
-      <li>Agentic tasks con pianificazione autonoma e uso di
-      strumenti</li>
       <li>Coding su codebase grandi con molte dipendenze da tenere a
       mente</li>
       <li>Revisione critica di architetture e decisioni di design</li>
+      <li>Scrittura creativa di alta qualità</li>
+      <li>Ricerca e sintesi su argomenti tecnici complessi</li>
       </ul>
       <p><strong>Quando NON usarlo</strong>: task semplici e ripetitivi,
       elaborazioni in batch ad alto volume, applicazioni real-time dove
@@ -884,8 +984,8 @@ pre { font-size: .8em; }
       <li>Assistente per ricerca e summarization</li>
       <li>Ideale per Claude Code nell&#39;uso quotidiano</li>
       </ul>
-      <p><strong>Nota</strong>: supporta <em>adaptive thinking</em>
-      (ragionamento adattivo) insieme a Opus 4.6.</p>
+      <p><strong>Nota</strong>: supporta sia <em>extended thinking</em>
+      che <em>adaptive thinking</em>.</p>
       <hr />
       <h3 id="claude-haiku-45--velocità-e-basso-costo">Claude Haiku 4.5
       — Velocità e basso costo</h3>
@@ -907,7 +1007,7 @@ pre { font-size: .8em; }
       <thead>
       <tr>
       <th>Funzionalità</th>
-      <th style="text-align: center;">Opus 4.6</th>
+      <th style="text-align: center;">Opus 4.7</th>
       <th style="text-align: center;">Sonnet 4.6</th>
       <th style="text-align: center;">Haiku 4.5</th>
       </tr>
@@ -915,7 +1015,7 @@ pre { font-size: .8em; }
       <tbody>
       <tr>
       <td>Extended thinking</td>
-      <td style="text-align: center;">✓</td>
+      <td style="text-align: center;">—</td>
       <td style="text-align: center;">✓</td>
       <td style="text-align: center;">✓</td>
       </tr>
@@ -941,13 +1041,14 @@ pre { font-size: .8em; }
       </table>
       <p><strong>Extended thinking</strong>: il modello ragiona passo
       per passo prima di rispondere (visibile nel &quot;thinking block&quot;).
-      Migliora le prestazioni su task complessi.</p>
+      Migliora le prestazioni su task complessi. <strong>Non disponibile
+      su Opus 4.7</strong>.</p>
       <p><strong>Adaptive thinking</strong>: il modello decide
       autonomamente quanto pensare in base alla difficoltà del task.</p>
       <hr />
       <h2 id="modelli-legacy">Modelli legacy</h2>
-      <p>Disponibili ma non consigliati per nuovi progetti. Usa le
-      versioni 4.x sopra.</p>
+      <p>Disponibili ma non consigliati per nuovi progetti. Usa i
+      modelli attuali sopra.</p>
       <table>
       <thead>
       <tr>
@@ -958,9 +1059,14 @@ pre { font-size: .8em; }
       </thead>
       <tbody>
       <tr>
+      <td>Claude Opus 4.6</td>
+      <td><code>claude-opus-4-6</code></td>
+      <td>Predecessore di Opus 4.7</td>
+      </tr>
+      <tr>
       <td>Claude Opus 4.5</td>
       <td><code>claude-opus-4-5-20251101</code></td>
-      <td>Predecessore di Opus 4.6</td>
+      <td>—</td>
       </tr>
       <tr>
       <td>Claude Sonnet 4.5</td>
@@ -975,17 +1081,17 @@ pre { font-size: .8em; }
       <tr>
       <td>Claude Sonnet 4</td>
       <td><code>claude-sonnet-4-20250514</code></td>
-      <td>—</td>
+      <td>Deprecated, ritiro 15 giu 2026</td>
       </tr>
       <tr>
       <td>Claude Opus 4</td>
       <td><code>claude-opus-4-20250514</code></td>
-      <td>—</td>
+      <td>Deprecated, ritiro 15 giu 2026</td>
       </tr>
       <tr>
       <td>Claude Haiku 3</td>
       <td><code>claude-3-haiku-20240307</code></td>
-      <td>Deprecated</td>
+      <td>Deprecated, ritiro 19 apr 2026</td>
       </tr>
       </tbody>
       </table>
@@ -996,15 +1102,19 @@ pre { font-size: .8em; }
       il ragionamento passo per passo in blocchi separati
       (<code>thinking</code> blocks). Utile per task complessi; da
       evitare per domande semplici (spreco di token).</p>
+      <blockquote>
+      <p><strong>Nota</strong>: Opus 4.7 <strong>non supporta</strong>
+      extended thinking. Usa solo adaptive thinking.</p>
+      </blockquote>
       <h3 id="modalità-disponibili">Modalità disponibili</h3>
-      <p><strong>Adattiva</strong> — consigliata per Opus 4.6 e Sonnet
-      4.6 Il modello decide autonomamente quanto pensare in base alla
+      <p><strong>Adattiva</strong> — disponibile su Opus 4.7, Sonnet 4.6
+      Il modello decide autonomamente quanto pensare in base alla
       complessità del task. Si controlla con il parametro
       <code>effort</code>:</p>
       <div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>thinking<span class="op">=</span>{<span class="st">&quot;type&quot;</span>: <span class="st">&quot;adaptive&quot;</span>, <span class="st">&quot;effort&quot;</span>: <span class="st">&quot;high&quot;</span>}  <span class="co"># low | medium | high</span></span></code></pre></div>
-      <p><strong>Manuale</strong> — disponibile su tutti i modelli con
-      extended thinking, deprecata su Opus/Sonnet 4.6 Si specifica un
-      budget fisso di token per il ragionamento:</p>
+      <p><strong>Manuale</strong> — disponibile su Sonnet 4.6 e Haiku
+      4.5, non su Opus 4.7 Si specifica un budget fisso di token per il
+      ragionamento:</p>
       <div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>thinking<span class="op">=</span>{<span class="st">&quot;type&quot;</span>: <span class="st">&quot;enabled&quot;</span>, <span class="st">&quot;budget_tokens&quot;</span>: <span class="dv">10000</span>}</span></code></pre></div>
       <p>Il <code>budget_tokens</code> deve essere inferiore a
       <code>max_tokens</code>.</p>
@@ -1064,8 +1174,8 @@ pre { font-size: .8em; }
       </thead>
       <tbody>
       <tr>
-      <td>Opus 4.6</td>
-      <td style="text-align: center;">✓</td>
+      <td>Opus 4.7</td>
+      <td style="text-align: center;">—</td>
       <td style="text-align: center;">✓</td>
       </tr>
       <tr>
