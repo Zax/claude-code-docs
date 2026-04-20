@@ -254,6 +254,8 @@ pre { font-size: .8em; }
         usarlo</a></li>
         <li><a href="#supporto-per-modello" id="toc-supporto-per-modello">Supporto per modello</a></li>
         </ul></li>
+        <li><a href="#ottimizzazione-del-contesto-via-api" id="toc-ottimizzazione-del-contesto-via-api">Ottimizzazione del
+        contesto via API</a></li>
         <li><a href="#note-pratiche" id="toc-note-pratiche">Note
         pratiche</a></li>
         </ul></li>
@@ -280,6 +282,17 @@ pre { font-size: .8em; }
         dell&#39;output</a></li>
         <li><a href="#workflow-efficace-per-il-codice" id="toc-workflow-efficace-per-il-codice">Workflow efficace per
         il codice</a></li>
+        <li><a href="#come-funziona-il-motore-interno" id="toc-come-funziona-il-motore-interno">Come funziona il motore
+        interno</a>
+        <ul>
+        <li><a href="#compaction-automatica" id="toc-compaction-automatica">Compaction automatica</a></li>
+        <li><a href="#orchestrazione-dei-tool" id="toc-orchestrazione-dei-tool">Orchestrazione dei
+        tool</a></li>
+        <li><a href="#catena-dei-permessi" id="toc-catena-dei-permessi">Catena dei permessi</a></li>
+        <li><a href="#tool-lazy-loading" id="toc-tool-lazy-loading">Tool
+        lazy loading</a></li>
+        <li><a href="#retry-differenziato" id="toc-retry-differenziato">Retry differenziato</a></li>
+        </ul></li>
         </ul></li>
         <li><a href="#link-utili" id="toc-link-utili">Link
         Utili</a></li>
@@ -1023,6 +1036,22 @@ pre { font-size: .8em; }
       mantenere la continuità del ragionamento.</p>
       </blockquote>
       <hr />
+      <h2 id="ottimizzazione-del-contesto-via-api">Ottimizzazione del
+      contesto via API</h2>
+      <p>L&#39;API Anthropic offre strategie native per gestire il contesto
+      senza tagliare lato client:</p>
+      <ul>
+      <li><strong><code>clear_tool_uses</code></strong>: rimuove i
+      blocchi tool_use/tool_result vecchi dai messaggi, preservando i
+      metadati. Riduce il contesto senza perdere il filo del
+      ragionamento.</li>
+      <li><strong><code>clear_thinking</code></strong>: toglie i
+      thinking block vecchi mantenendo solo i più recenti. Utile con
+      extended thinking attivo su sessioni lunghe.</li>
+      </ul>
+      <p>Queste strategie sono più precise del troncamento generico
+      perché operano a livello semantico (rimuovono parti specifiche)
+      anziché tagliare per posizione.</p>
       <h2 id="note-pratiche">Note pratiche</h2>
       <ul>
       <li>I modelli sono disponibili su <strong>Anthropic API</strong>,
@@ -1176,6 +1205,87 @@ pre { font-size: .8em; }
       <li><strong>&quot;Tre righe simili sono meglio di un&#39;astrazione
       prematura&quot;</strong>: evitare over-engineering</li>
       </ul>
+      <h2 id="come-funziona-il-motore-interno">Come funziona il motore
+      interno</h2>
+      <p>Capire come funziona Claude Code sotto il cofano aiuta a usarlo
+      meglio.</p>
+      <h3 id="compaction-automatica">Compaction automatica</h3>
+      <p>Quando il contesto raggiunge il <strong>70% della
+      finestra</strong>, un agent separato riassume i messaggi vecchi
+      preservando le decisioni chiave. Non taglia per posizione
+      cronologica ma per rilevanza.</p>
+      <ul>
+      <li>Dopo 3-4 compaction successive, vincoli lontani possono
+      diventare rumore</li>
+      <li>Per task lunghi, chiedi a Claude di salvare decisioni
+      importanti in un file prima che vengano compattate</li>
+      <li>CLAUDE.md e la memoria persistente non sono soggetti a
+      compaction</li>
+      </ul>
+      <h3 id="orchestrazione-dei-tool">Orchestrazione dei tool</h3>
+      <p>Claude Code classifica ogni tool con metadati
+      (<code>isReadOnly</code>, <code>isConcurrencySafe</code>,
+      <code>isDestructive</code>) e decide automaticamente come
+      eseguirli:</p>
+      <ul>
+      <li><strong>Tool read-only</strong> (Read, Grep, Glob): eseguiti
+      in <strong>parallelo</strong> (max 10 simultanei)</li>
+      <li><strong>Tool non-read-only</strong> (Edit, Write, Bash):
+      eseguiti in <strong>serie</strong></li>
+      <li>Concorrenza massima configurabile:
+      <code>CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY=10</code></li>
+      </ul>
+      <p>Questo spiega perché le ricerche sono veloci (parallele) mentre
+      le scritture sono sequenziali.</p>
+      <h3 id="catena-dei-permessi">Catena dei permessi</h3>
+      <p>Quando Claude vuole eseguire un tool, la richiesta passa per 4
+      livelli:</p>
+      <ol type="1">
+      <li><strong>Regole statiche</strong> in <code>settings.json</code>
+      (allow/deny per tool e pattern)</li>
+      <li><strong>Hook pre-tool-use</strong> (script shell che possono
+      bloccare/modificare/approvare)</li>
+      <li><strong>Classificatore ML</strong> che valuta il rischio
+      semantico (non semplice pattern matching)</li>
+      <li><strong>Prompt utente</strong> (conferma manuale, ultima
+      risorsa)</li>
+      </ol>
+      <h3 id="tool-lazy-loading">Tool lazy loading</h3>
+      <p>Solo i tool essenziali sono caricati nel prompt iniziale. Gli
+      altri sono differiti e scoperti on-demand tramite
+      <code>ToolSearch</code> quando servono. Questo risparmia token di
+      contesto: zero costo per tool non usati nella sessione.</p>
+      <h3 id="retry-differenziato">Retry differenziato</h3>
+      <p>Claude Code gestisce gli errori API in modo diverso:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Errore</th>
+      <th>Retry</th>
+      <th>Strategia</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>429 (rate limit)</td>
+      <td>Fino a 10</td>
+      <td>Backoff esponenziale (500ms → raddoppia)</td>
+      </tr>
+      <tr>
+      <td>529 (server saturato)</td>
+      <td>Max 3, solo foreground</td>
+      <td>Zero retry per sub-agent in background</td>
+      </tr>
+      <tr>
+      <td>Errori connessione</td>
+      <td>1 singolo</td>
+      <td>—</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>I sub-agent in background non fanno retry su 529 per non
+      amplificare il carico sul server (ogni retry moltiplica il carico
+      3-10x).</p>
       <hr />
       <h1 id="link-utili">Link Utili</h1>
       <ul>
