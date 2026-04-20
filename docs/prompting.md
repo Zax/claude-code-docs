@@ -37,4 +37,4 @@ Un metodo efficace per migliorare è chiedere all'AI di **analizzare le proprie 
 
 ---
 
-[← CLAUDE.md](claude-md.md) | [Successivo: Claude API →](api.md)
+[← CLAUDE.md](claude-md.md) | [Successivo: Modelli Claude →](modelli.md)
