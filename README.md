@@ -29,4 +29,4 @@ Report di analisi di repository e risorse esterne da cui sono state estratte inf
 
 ---
 
-*Ultimo aggiornamento: 31 marzo 2026*
+*Ultimo aggiornamento: 20 aprile 2026*
