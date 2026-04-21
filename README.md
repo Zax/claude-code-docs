@@ -27,7 +27,8 @@ Report di analisi di repository e risorse esterne da cui sono state estratte inf
 - [analisi-come-parli-allai](docs/fonti-esterne/analisi-come-parli-allai.md) — Auto-analisi del proprio stile di prompting
 - [claude-config-audit](docs/fonti-esterne/claude-config-audit.md) — Skill per audit configurazione Claude (MCP, plugin, skill, prompt, memoria)
 - [cambiamo-paradigma](docs/fonti-esterne/cambiamo-paradigma.md) — Architettura interna di Claude Code: pattern ReAct, orchestrazione tool, sub-agent, memoria
+- [lean-ctx](docs/fonti-esterne/lean-ctx.md) — MCP Server e shell hook in Rust per ridurre il consumo token AI fino al 99%
 
 ---
 
-*Ultimo aggiornamento: 20 aprile 2026*
+*Ultimo aggiornamento: 21 aprile 2026*
