@@ -28,6 +28,7 @@ Report di analisi di repository e risorse esterne da cui sono state estratte inf
 - [claude-config-audit](docs/fonti-esterne/claude-config-audit.md) — Skill per audit configurazione Claude (MCP, plugin, skill, prompt, memoria)
 - [cambiamo-paradigma](docs/fonti-esterne/cambiamo-paradigma.md) — Architettura interna di Claude Code: pattern ReAct, orchestrazione tool, sub-agent, memoria
 - [lean-ctx](docs/fonti-esterne/lean-ctx.md) — MCP Server e shell hook in Rust per ridurre il consumo token AI fino al 99%
+- [rtk](docs/fonti-esterne/rtk.md) — Rust Token Killer: proxy CLI per compressione output comandi (60-90% risparmio token)
 
 ---
 
