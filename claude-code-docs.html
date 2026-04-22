@@ -276,6 +276,18 @@ pre { font-size: .8em; }
         <ul>
         <li><a href="#aggiungere-un-server-mcp" id="toc-aggiungere-un-server-mcp">Aggiungere un server
         MCP</a></li>
+        <li><a href="#tool-search-e-lazy-loading" id="toc-tool-search-e-lazy-loading">Tool search e lazy
+        loading</a></li>
+        <li><a href="#computer-use-mcp-server" id="toc-computer-use-mcp-server">Computer-use MCP Server</a>
+        <ul>
+        <li><a href="#requisiti-1" id="toc-requisiti-1">Requisiti</a></li>
+        <li><a href="#abilitazione" id="toc-abilitazione">Abilitazione</a></li>
+        <li><a href="#come-funziona" id="toc-come-funziona">Come
+        funziona</a></li>
+        <li><a href="#sicurezza" id="toc-sicurezza">Sicurezza</a></li>
+        <li><a href="#casi-duso" id="toc-casi-duso">Casi d&#39;uso</a></li>
+        <li><a href="#troubleshooting" id="toc-troubleshooting">Troubleshooting</a></li>
+        </ul></li>
         </ul></li>
         <li><a href="#limiti-e-pricing" id="toc-limiti-e-pricing">Limiti
         e Pricing</a>
@@ -391,7 +403,7 @@ pre { font-size: .8em; }
         <ul>
         <li><a href="#cosè-1" id="toc-cosè-1">Cos&#39;è</a></li>
         <li><a href="#installazione" id="toc-installazione">Installazione</a></li>
-        <li><a href="#requisiti-1" id="toc-requisiti-1">Requisiti</a></li>
+        <li><a href="#requisiti-2" id="toc-requisiti-2">Requisiti</a></li>
         <li><a href="#cosa-mostra" id="toc-cosa-mostra">Cosa mostra</a>
         <ul>
         <li><a href="#layout-predefinito-2-righe" id="toc-layout-predefinito-2-righe">Layout predefinito (2
@@ -411,8 +423,8 @@ pre { font-size: .8em; }
         <ul>
         <li><a href="#cosè-2" id="toc-cosè-2">Cos&#39;è</a></li>
         <li><a href="#installazione-1" id="toc-installazione-1">Installazione</a></li>
-        <li><a href="#requisiti-2" id="toc-requisiti-2">Requisiti</a></li>
-        <li><a href="#come-funziona" id="toc-come-funziona">Come
+        <li><a href="#requisiti-3" id="toc-requisiti-3">Requisiti</a></li>
+        <li><a href="#come-funziona-1" id="toc-come-funziona-1">Come
         funziona</a>
         <ul>
         <li><a href="#lifecycle-hooks" id="toc-lifecycle-hooks">Lifecycle hooks</a></li>
@@ -429,7 +441,7 @@ pre { font-size: .8em; }
         <ul>
         <li><a href="#cosè-3" id="toc-cosè-3">Cos&#39;è</a></li>
         <li><a href="#installazione-2" id="toc-installazione-2">Installazione</a></li>
-        <li><a href="#come-funziona-1" id="toc-come-funziona-1">Come
+        <li><a href="#come-funziona-2" id="toc-come-funziona-2">Come
         funziona</a></li>
         <li><a href="#skill-disponibili" id="toc-skill-disponibili">Skill disponibili</a>
         <ul>
@@ -1262,6 +1274,176 @@ pre { font-size: .8em; }
       comandi bash. Con MCP può interrogare database, creare ticket
       Jira, fare review su GitHub, controllare errori su Sentry,
       ecc.</p>
+      <h2 id="tool-search-e-lazy-loading">Tool search e lazy
+      loading</h2>
+      <p>Solo i tool essenziali vengono caricati nel prompt iniziale. I
+      tool MCP sono <strong>differiti di default</strong>: nel contesto
+      entra solo il nome (~token minimi), e lo schema completo viene
+      caricato on-demand quando Claude decide di usarli. Questo
+      significa zero costo per i server MCP configurati ma non usati
+      nella sessione.</p>
+      <p>Per vedere cosa sta occupando contesto, usare il comando
+      <code>/context</code>.</p>
+      <h2 id="computer-use-mcp-server">Computer-use MCP Server</h2>
+      <p><code>computer-use</code> è un server MCP
+      <strong>built-in</strong> che permette a Claude di controllare il
+      computer tramite GUI: aprire app, cliccare, digitare, scorrere e
+      fare screenshot dello schermo.</p>
+      <h3 id="requisiti-1">Requisiti</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Requisito</th>
+      <th>Dettaglio</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Piattaforma</td>
+      <td>Solo macOS (su Windows disponibile solo in Desktop app)</td>
+      </tr>
+      <tr>
+      <td>Piano</td>
+      <td>Pro o Max (non disponibile su Team/Enterprise)</td>
+      </tr>
+      <tr>
+      <td>Versione</td>
+      <td>Claude Code v2.1.85 o successiva</td>
+      </tr>
+      <tr>
+      <td>Sessione</td>
+      <td>Solo interattiva (non funziona con flag <code>-p</code>)</td>
+      </tr>
+      <tr>
+      <td>Permessi macOS</td>
+      <td>Accessibility + Screen Recording</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3 id="abilitazione">Abilitazione</h3>
+      <p>Il server è disattivato di default. Per attivarlo:</p>
+      <ol type="1">
+      <li>Eseguire <code>/mcp</code> nella sessione</li>
+      <li>Selezionare <code>computer-use</code> dalla lista</li>
+      <li>Scegliere <strong>Enable</strong> (l&#39;impostazione persiste per
+      progetto)</li>
+      <li>Al primo uso, concedere i permessi macOS richiesti
+      (Accessibility e Screen Recording)</li>
+      </ol>
+      <h3 id="come-funziona">Come funziona</h3>
+      <p>Claude sceglie automaticamente lo strumento più preciso
+      disponibile, in ordine di priorità:</p>
+      <ol type="1">
+      <li><strong>MCP server dedicato</strong> per il servizio → lo
+      usa</li>
+      <li><strong>Comando shell</strong> → usa Bash</li>
+      <li><strong>Task nel browser</strong> con <a href="https://code.claude.com/docs/en/chrome">Chrome</a>
+      configurato → usa Chrome</li>
+      <li><strong>Nessuno dei precedenti</strong> → usa
+      computer-use</li>
+      </ol>
+      <p>Quando computer-use è attivo:</p>
+      <ul>
+      <li>Le app da controllare vanno <strong>approvate
+      singolarmente</strong> per sessione</li>
+      <li>Le altre app vengono <strong>nascoste</strong> (ripristinate a
+      fine turno)</li>
+      <li>Il <strong>terminale è escluso</strong> dagli screenshot
+      (sicurezza)</li>
+      <li>Un <strong>lock esclusivo</strong> impedisce l&#39;uso da più
+      sessioni simultanee</li>
+      <li>Gli screenshot vengono <strong>ridimensionati
+      automaticamente</strong> (es. 3456×2234 → ~1372×887 su
+      Retina)</li>
+      </ul>
+      <h3 id="sicurezza">Sicurezza</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Guardrail</th>
+      <th>Descrizione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Approvazione per-app</td>
+      <td>Claude controlla solo le app approvate nella sessione
+      corrente</td>
+      </tr>
+      <tr>
+      <td>Warning per app sensibili</td>
+      <td>Terminali → &quot;equivalente a shell access&quot;, Finder → &quot;accesso a
+      qualsiasi file&quot;, System Settings → &quot;può modificare impostazioni di
+      sistema&quot;</td>
+      </tr>
+      <tr>
+      <td>Terminale escluso</td>
+      <td>Claude non vede mai il proprio output nei screenshot</td>
+      </tr>
+      <tr>
+      <td>Escape globale</td>
+      <td>Premere <strong>Esc</strong> ovunque per interrompere
+      immediatamente</td>
+      </tr>
+      <tr>
+      <td>Lock file</td>
+      <td>Una sola sessione alla volta può usare il computer</td>
+      </tr>
+      </tbody>
+      </table>
+      <p>Le app vengono classificate in livelli di controllo:</p>
+      <ul>
+      <li><strong>Solo visualizzazione</strong>: browser e piattaforme
+      di trading</li>
+      <li><strong>Solo click</strong>: terminali e IDE</li>
+      <li><strong>Controllo completo</strong>: tutte le altre app</li>
+      </ul>
+      <h3 id="casi-duso">Casi d&#39;uso</h3>
+      <ul>
+      <li><strong>Build e validazione app native</strong>: compilare un
+      target Swift/macOS, lanciare l&#39;app, cliccare sui controlli, fare
+      screenshot dei risultati</li>
+      <li><strong>Test UI end-to-end</strong>: aprire un&#39;app Electron,
+      navigare il flusso di onboarding, catturare ogni step — senza
+      configurare Playwright</li>
+      <li><strong>Debug visuale</strong>: ridimensionare finestre per
+      riprodurre bug di layout, fare screenshot, correggere il CSS,
+      verificare la fix</li>
+      <li><strong>iOS Simulator</strong>: controllare il simulatore
+      senza scrivere XCTest</li>
+      <li><strong>App GUI-only</strong>: interagire con design tool,
+      pannelli hardware, app proprietarie senza CLI/API</li>
+      </ul>
+      <p>Esempio di prompt:</p>
+      <pre><code>Build the MenuBarStats target, launch it, open the preferences window,
+and verify the interval slider updates the label. Screenshot the
+preferences window when you&#39;re done.</code></pre>
+      <h3 id="troubleshooting">Troubleshooting</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Problema</th>
+      <th>Soluzione</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>&quot;Computer use is in use by another session&quot;</td>
+      <td>Chiudere l&#39;altra sessione; se crashata, il lock si rilascia
+      automaticamente</td>
+      </tr>
+      <tr>
+      <td>Permessi macOS richiesti di continuo</td>
+      <td>Riavviare Claude Code; verificare in Impostazioni di Sistema →
+      Privacy → Screen Recording</td>
+      </tr>
+      <tr>
+      <td><code>computer-use</code> non appare in <code>/mcp</code></td>
+      <td>Verificare: macOS, v2.1.85+, piano Pro/Max, autenticazione
+      claude.ai, sessione interattiva</td>
+      </tr>
+      </tbody>
+      </table>
       <hr />
       <h1 id="limiti-e-pricing">Limiti e Pricing</h1>
       <p>Rate limit, costi per token, differenze tra piani e
@@ -1429,7 +1611,7 @@ pre { font-size: .8em; }
       cambiano, i suggerimenti si aggiornano di conseguenza.</p>
       </blockquote>
       <p>Il comando è disponibile anche da terminale:</p>
-      <div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> /insights</span></code></pre></div>
+      <div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> /insights</span></code></pre></div>
       <h3 id="stats--panoramica-dellattività"><code>/stats</code> —
       Panoramica dell&#39;attività</h3>
       <p>Mostra statistiche visuali sull&#39;utilizzo quotidiano:</p>
@@ -1786,16 +1968,16 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <p>Il manifest è opzionale. Se omesso, Claude Code scopre i
       componenti nelle posizioni default e usa il nome della
       directory.</p>
-      <div class="sourceCode" id="cb25"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;my-plugin&quot;</span><span class="fu">,</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Descrizione del plugin&quot;</span><span class="fu">,</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;author&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Nome Autore&quot;</span> <span class="fu">},</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;homepage&quot;</span><span class="fu">:</span> <span class="st">&quot;https://docs.example.com&quot;</span><span class="fu">,</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;repository&quot;</span><span class="fu">:</span> <span class="st">&quot;https://github.com/user/plugin&quot;</span><span class="fu">,</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;license&quot;</span><span class="fu">:</span> <span class="st">&quot;MIT&quot;</span><span class="fu">,</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;keywords&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;keyword1&quot;</span><span class="ot">,</span> <span class="st">&quot;keyword2&quot;</span><span class="ot">]</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+      <div class="sourceCode" id="cb26"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;my-plugin&quot;</span><span class="fu">,</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Descrizione del plugin&quot;</span><span class="fu">,</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;author&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Nome Autore&quot;</span> <span class="fu">},</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;homepage&quot;</span><span class="fu">:</span> <span class="st">&quot;https://docs.example.com&quot;</span><span class="fu">,</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;repository&quot;</span><span class="fu">:</span> <span class="st">&quot;https://github.com/user/plugin&quot;</span><span class="fu">,</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;license&quot;</span><span class="fu">:</span> <span class="st">&quot;MIT&quot;</span><span class="fu">,</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;keywords&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;keyword1&quot;</span><span class="ot">,</span> <span class="st">&quot;keyword2&quot;</span><span class="ot">]</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
       <p>Il campo <code>name</code> è l&#39;unico obbligatorio e definisce
       il namespace delle skill (es. <code>/my-plugin:hello</code>).</p>
       <h3 id="versioning">Versioning</h3>
@@ -1809,41 +1991,41 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <strong>ufficiale Anthropic</strong>
       (<code>claude-plugins-official</code>) è disponibile
       automaticamente.</p>
-      <div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Installare un plugin dal marketplace ufficiale</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install github@claude-plugins-official</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiungere un marketplace custom</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add owner/repo                     <span class="co"># GitHub</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add https://gitlab.com/org/repo.git  <span class="co"># Git URL</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add ./my-marketplace               <span class="co"># Locale</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiornare il catalogo</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace update marketplace-name</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Rimuovere un marketplace (rimuove anche i plugin installati da esso)</span></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace remove marketplace-name</span></code></pre></div>
+      <div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Installare un plugin dal marketplace ufficiale</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install github@claude-plugins-official</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiungere un marketplace custom</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add owner/repo                     <span class="co"># GitHub</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add https://gitlab.com/org/repo.git  <span class="co"># Git URL</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add ./my-marketplace               <span class="co"># Locale</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiornare il catalogo</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace update marketplace-name</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Rimuovere un marketplace (rimuove anche i plugin installati da esso)</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace remove marketplace-name</span></code></pre></div>
       <h3 id="installare-aggiornare-gestire">Installare, aggiornare,
       gestire</h3>
-      <div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Installare (default: scope user)</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install plugin-name@marketplace-name</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Con scope specifico</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> plugin install formatter@my-marketplace <span class="at">--scope</span> project</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiornare</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> update plugin-name</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Disabilitare senza rimuovere</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> disable plugin-name@marketplace-name</span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Riabilitare</span></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> enable plugin-name@marketplace-name</span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Rimuovere completamente</span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> uninstall plugin-name@marketplace-name</span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Ricaricare dopo modifiche (senza riavviare)</span></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="ex">/reload-plugins</span></span></code></pre></div>
+      <div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Installare (default: scope user)</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install plugin-name@marketplace-name</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Con scope specifico</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> plugin install formatter@my-marketplace <span class="at">--scope</span> project</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggiornare</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> update plugin-name</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Disabilitare senza rimuovere</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> disable plugin-name@marketplace-name</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Riabilitare</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> enable plugin-name@marketplace-name</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Rimuovere completamente</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> uninstall plugin-name@marketplace-name</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Ricaricare dopo modifiche (senza riavviare)</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="ex">/reload-plugins</span></span></code></pre></div>
       <h3 id="scope-di-installazione">Scope di installazione</h3>
       <table>
       <thead>
@@ -1902,16 +2084,16 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <h3 id="agent">Agent</h3>
       <p>Subagent specializzati in <code>agents/</code> come file
       markdown con frontmatter:</p>
-      <div class="sourceCode" id="cb28"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> security-reviewer</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Rivede il codice per vulnerabilità di sicurezza</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">model</span><span class="kw">:</span><span class="at"> sonnet</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">effort</span><span class="kw">:</span><span class="at"> medium</span></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">maxTurns</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="fu">disallowedTools</span><span class="kw">:</span><span class="at"> Write, Edit</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="at">Prompt di sistema dell&#39;agent...</span></span></code></pre></div>
+      <div class="sourceCode" id="cb29"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> security-reviewer</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Rivede il codice per vulnerabilità di sicurezza</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">model</span><span class="kw">:</span><span class="at"> sonnet</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">effort</span><span class="kw">:</span><span class="at"> medium</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">maxTurns</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">disallowedTools</span><span class="kw">:</span><span class="at"> Write, Edit</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="at">Prompt di sistema dell&#39;agent...</span></span></code></pre></div>
       <p>Campi supportati: <code>name</code>, <code>description</code>,
       <code>model</code>, <code>effort</code>, <code>maxTurns</code>,
       <code>tools</code>, <code>disallowedTools</code>,
@@ -1919,20 +2101,20 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <code>isolation</code> (solo <code>&quot;worktree&quot;</code>).</p>
       <p>Un plugin può impostare un agent come thread principale tramite
       <code>settings.json</code>:</p>
-      <div class="sourceCode" id="cb29"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;agent&quot;</span><span class="fu">:</span> <span class="st">&quot;security-reviewer&quot;</span> <span class="fu">}</span></span></code></pre></div>
+      <div class="sourceCode" id="cb30"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;agent&quot;</span><span class="fu">:</span> <span class="st">&quot;security-reviewer&quot;</span> <span class="fu">}</span></span></code></pre></div>
       <h3 id="hook">Hook</h3>
       <p>Gestori di eventi in <code>hooks/hooks.json</code>. Stessi
       eventi della configurazione standalone:</p>
-      <div class="sourceCode" id="cb30"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;PostToolUse&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;matcher&quot;</span><span class="fu">:</span> <span class="st">&quot;Write|Edit&quot;</span><span class="fu">,</span></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;command&quot;</span><span class="fu">,</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/scripts/format.sh&quot;</span> <span class="fu">}</span><span class="ot">]</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+      <div class="sourceCode" id="cb31"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;PostToolUse&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;matcher&quot;</span><span class="fu">:</span> <span class="st">&quot;Write|Edit&quot;</span><span class="fu">,</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;command&quot;</span><span class="fu">,</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/scripts/format.sh&quot;</span> <span class="fu">}</span><span class="ot">]</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
       <p><strong>Tipi di hook</strong>: <code>command</code> (shell),
       <code>http</code> (POST a URL), <code>prompt</code> (valutazione
       LLM), <code>agent</code> (verifica agentica).</p>
@@ -1948,14 +2130,14 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <code>ConfigChange</code>, e altri.</p>
       <h3 id="server-mcp">Server MCP</h3>
       <p>Server MCP bundled in <code>.mcp.json</code>:</p>
-      <div class="sourceCode" id="cb31"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;plugin-api&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/servers/api-server&quot;</span><span class="fu">,</span></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;--config&quot;</span><span class="ot">,</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/config.json&quot;</span><span class="ot">]</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+      <div class="sourceCode" id="cb32"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;plugin-api&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/servers/api-server&quot;</span><span class="fu">,</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;--config&quot;</span><span class="ot">,</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/config.json&quot;</span><span class="ot">]</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
       <p>Si avviano automaticamente quando il plugin è abilitato.</p>
       <h3 id="server-lsp-code-intelligence">Server LSP (Code
       Intelligence)</h3>
@@ -1970,13 +2152,13 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       references, hover info, list symbols</li>
       </ul>
       <p>Configurazione in <code>.lsp.json</code>:</p>
-      <div class="sourceCode" id="cb32"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;gopls&quot;</span><span class="fu">,</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;extensionToLanguage&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;.go&quot;</span><span class="fu">:</span> <span class="st">&quot;go&quot;</span> <span class="fu">}</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+      <div class="sourceCode" id="cb33"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;gopls&quot;</span><span class="fu">,</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;extensionToLanguage&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;.go&quot;</span><span class="fu">:</span> <span class="st">&quot;go&quot;</span> <span class="fu">}</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
       <blockquote>
       <p>Il binario del language server va installato separatamente. Il
       plugin configura solo la connessione.</p>
@@ -2052,14 +2234,14 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <h3 id="monitor">Monitor</h3>
       <p>Processi in background che osservano log, file o stati esterni
       e notificano Claude ad ogni riga stdout:</p>
-      <div class="sourceCode" id="cb33"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;error-log&quot;</span><span class="fu">,</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;tail -F ./logs/error.log&quot;</span><span class="fu">,</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Application error log&quot;</span><span class="fu">,</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;when&quot;</span><span class="fu">:</span> <span class="st">&quot;always&quot;</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
+      <div class="sourceCode" id="cb34"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;error-log&quot;</span><span class="fu">,</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;tail -F ./logs/error.log&quot;</span><span class="fu">,</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Application error log&quot;</span><span class="fu">,</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;when&quot;</span><span class="fu">:</span> <span class="st">&quot;always&quot;</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
       <p>Il campo <code>when</code> controlla quando parte:
       <code>&quot;always&quot;</code> (default, all&#39;avvio sessione) o
       <code>&quot;on-skill-invoke:&lt;nome-skill&gt;&quot;</code> (alla prima
@@ -2202,31 +2384,31 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <h3 id="user-config">User config</h3>
       <p>Il campo <code>userConfig</code> nel manifest permette di
       chiedere valori all&#39;utente quando il plugin è abilitato:</p>
-      <div class="sourceCode" id="cb34"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;userConfig&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;api_endpoint&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;API endpoint&quot;</span><span class="fu">,</span> <span class="dt">&quot;sensitive&quot;</span><span class="fu">:</span> <span class="kw">false</span> <span class="fu">},</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;api_token&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Token di autenticazione&quot;</span><span class="fu">,</span> <span class="dt">&quot;sensitive&quot;</span><span class="fu">:</span> <span class="kw">true</span> <span class="fu">}</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+      <div class="sourceCode" id="cb35"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;userConfig&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;api_endpoint&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;API endpoint&quot;</span><span class="fu">,</span> <span class="dt">&quot;sensitive&quot;</span><span class="fu">:</span> <span class="kw">false</span> <span class="fu">},</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;api_token&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Token di autenticazione&quot;</span><span class="fu">,</span> <span class="dt">&quot;sensitive&quot;</span><span class="fu">:</span> <span class="kw">true</span> <span class="fu">}</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
       <p>I valori sono disponibili come <code>${user_config.KEY}</code>
       nelle configurazioni e come
       <code>CLAUDE_PLUGIN_OPTION_&lt;KEY&gt;</code> nelle variabili
       d&#39;ambiente. I valori sensibili vanno nel keychain di sistema.</p>
       <h2 id="sviluppo-e-testing">Sviluppo e testing</h2>
-      <div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Testare un plugin locale senza installarlo</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--plugin-dir</span> ./my-plugin</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Caricare più plugin contemporaneamente</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--plugin-dir</span> ./plugin-one <span class="at">--plugin-dir</span> ./plugin-two</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Debug dettagliato del caricamento</span></span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--debug</span></span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Validare manifest e componenti</span></span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> validate</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Ricaricare dopo modifiche</span></span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="ex">/reload-plugins</span></span></code></pre></div>
+      <div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Testare un plugin locale senza installarlo</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--plugin-dir</span> ./my-plugin</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Caricare più plugin contemporaneamente</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--plugin-dir</span> ./plugin-one <span class="at">--plugin-dir</span> ./plugin-two</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Debug dettagliato del caricamento</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--debug</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Validare manifest e componenti</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> validate</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Ricaricare dopo modifiche</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="ex">/reload-plugins</span></span></code></pre></div>
       <h3 id="convertire-configurazione-standalone-in-plugin">Convertire
       configurazione standalone in plugin</h3>
       <ol type="1">
@@ -2324,14 +2506,14 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       contesto, strumenti attivi, agenti in esecuzione, progresso dei
       task, stato git e limiti di utilizzo dell&#39;abbonamento.</p>
       <h2 id="installazione">Installazione</h2>
-      <div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Aggiungere il marketplace</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add jarrodwatts/claude-hud</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Installare il plugin</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install claude-hud</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Configurare la statusline</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="ex">/claude-hud:setup</span></span></code></pre></div>
+      <div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Aggiungere il marketplace</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add jarrodwatts/claude-hud</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Installare il plugin</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install claude-hud</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Configurare la statusline</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="ex">/claude-hud:setup</span></span></code></pre></div>
       <p>Dopo il setup, riavviare completamente Claude Code.</p>
       <blockquote>
       <p><strong>Linux</strong>: se <code>/tmp</code> è un filesystem
@@ -2340,7 +2522,7 @@ Total code changes:    0 lines added, 0 lines removed</code></pre>
       <p><strong>Windows</strong>: se manca un runtime JS, installare
       Node.js LTS con <code>winget install OpenJS.NodeJS.LTS</code></p>
       </blockquote>
-      <h2 id="requisiti-1">Requisiti</h2>
+      <h2 id="requisiti-2">Requisiti</h2>
       <ul>
       <li>Claude Code v1.0.80+</li>
       <li>Node.js 18+ o Bun</li>
@@ -2366,7 +2548,7 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       di contesto.</p>
       <h2 id="configurazione">Configurazione</h2>
       <h3 id="configurazione-guidata">Configurazione guidata</h3>
-      <div class="sourceCode" id="cb39"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/claude-hud:configure</span></span></code></pre></div>
+      <div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/claude-hud:configure</span></span></code></pre></div>
       <p>Avvia un flusso interattivo per scegliere un preset e regolare
       i singoli elementi.</p>
       <h3 id="preset-disponibili">Preset disponibili</h3>
@@ -2521,8 +2703,8 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       <p>In pratica: mantiene la continuità della conoscenza progettuale
       anche dopo la chiusura delle sessioni.</p>
       <h2 id="installazione-1">Installazione</h2>
-      <div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add thedotmack/claude-mem</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install claude-mem</span></code></pre></div>
+      <div class="sourceCode" id="cb41"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add thedotmack/claude-mem</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install claude-mem</span></code></pre></div>
       <p>Dopo il riavvio di Claude Code, il contesto delle sessioni
       precedenti apparirà automaticamente.</p>
       <blockquote>
@@ -2530,7 +2712,7 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       installa solo la libreria SDK, non il plugin completo con hook
       system e worker service.</p>
       </blockquote>
-      <h2 id="requisiti-2">Requisiti</h2>
+      <h2 id="requisiti-3">Requisiti</h2>
       <ul>
       <li>Node.js &gt;= 18.0.0</li>
       <li>Claude Code con supporto plugin</li>
@@ -2539,7 +2721,7 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       (auto-installato)</li>
       <li>SQLite 3 (incluso)</li>
       </ul>
-      <h2 id="come-funziona">Come funziona</h2>
+      <h2 id="come-funziona-1">Come funziona</h2>
       <h3 id="lifecycle-hooks">Lifecycle hooks</h3>
       <p>Il plugin si aggancia a 5 eventi del ciclo di vita di Claude
       Code:</p>
@@ -2645,15 +2827,15 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       rigoroso.</p>
       <h2 id="installazione-2">Installazione</h2>
       <p><strong>Claude Code (Official Marketplace):</strong></p>
-      <div class="sourceCode" id="cb41"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install superpowers@claude-plugins-official</span></code></pre></div>
+      <div class="sourceCode" id="cb42"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install superpowers@claude-plugins-official</span></code></pre></div>
       <p><strong>Claude Code (Custom Marketplace):</strong></p>
-      <div class="sourceCode" id="cb42"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add obra/superpowers-marketplace</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install superpowers@superpowers-marketplace</span></code></pre></div>
+      <div class="sourceCode" id="cb43"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> marketplace add obra/superpowers-marketplace</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> install superpowers@superpowers-marketplace</span></code></pre></div>
       <p><strong>Cursor:</strong></p>
       <pre><code>/add-plugin superpowers</code></pre>
       <p><strong>Aggiornamento:</strong></p>
-      <div class="sourceCode" id="cb44"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> update superpowers</span></code></pre></div>
-      <h2 id="come-funziona-1">Come funziona</h2>
+      <div class="sourceCode" id="cb45"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/plugin</span> update superpowers</span></code></pre></div>
+      <h2 id="come-funziona-2">Come funziona</h2>
       <p>Le skill si attivano automaticamente quando Claude rileva
       determinati contesti (es. &quot;aiutami a pianificare questa feature&quot;).
       Non serve configurazione manuale post-installazione.</p>
@@ -2780,17 +2962,17 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
       <code>packages/frontend/.claude/skills/</code>).</p>
       <h2 id="formato-di-skillmd">Formato di SKILL.md</h2>
       <p>Il file è composto da frontmatter YAML + corpo markdown:</p>
-      <div class="sourceCode" id="cb46"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> explain-code</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Spiega il codice con diagrammi e analogie. Usalo quando chiedi &quot;come funziona questo codice?&quot;</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="fu">Quando spieghi del codice, includi sempre</span><span class="kw">:</span></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="fu">1. **Analogia**</span><span class="kw">:</span><span class="at"> paragona il codice a qualcosa di quotidiano</span></span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="fu">2. **Diagramma**</span><span class="kw">:</span><span class="at"> usa ASCII art per mostrare il flusso</span></span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="fu">3. **Walkthrough**</span><span class="kw">:</span><span class="at"> spiega passo per passo cosa succede</span></span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="fu">4. **Gotcha**</span><span class="kw">:</span><span class="at"> qual è l&#39;errore comune o il malinteso tipico?</span></span></code></pre></div>
+      <div class="sourceCode" id="cb47"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> explain-code</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Spiega il codice con diagrammi e analogie. Usalo quando chiedi &quot;come funziona questo codice?&quot;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="fu">Quando spieghi del codice, includi sempre</span><span class="kw">:</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="fu">1. **Analogia**</span><span class="kw">:</span><span class="at"> paragona il codice a qualcosa di quotidiano</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="fu">2. **Diagramma**</span><span class="kw">:</span><span class="at"> usa ASCII art per mostrare il flusso</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a><span class="fu">3. **Walkthrough**</span><span class="kw">:</span><span class="at"> spiega passo per passo cosa succede</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a><span class="fu">4. **Gotcha**</span><span class="kw">:</span><span class="at"> qual è l&#39;errore comune o il malinteso tipico?</span></span></code></pre></div>
       <h3 id="campi-frontmatter-obbligatori">Campi frontmatter
       obbligatori</h3>
       <table>
