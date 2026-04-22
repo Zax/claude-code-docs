@@ -22,6 +22,95 @@ Claude Code tende ad essere verboso per default. È possibile ridurre l'output d
 
 > **Attenzione**: il file CLAUDE.md stesso consuma token di input ad ogni messaggio. Il risparmio netto è positivo solo con un volume di output sufficiente a compensare. Per query brevi e uso occasionale, può costare più di quanto fa risparmiare.
 
+## Analisi dell'uso: `/insights`, `/stats` e `/cost`
+
+Claude Code offre tre comandi built-in per analizzare il proprio utilizzo, a diversi livelli di dettaglio.
+
+### `/insights` — Report approfondito delle sessioni
+
+Genera un report che analizza le sessioni Claude Code degli ultimi **30 giorni**, producendo un file HTML interattivo salvato localmente.
+
+```
+/insights
+```
+
+Il report include:
+
+- **Aree di progetto**: su quali parti del codice hai lavorato di più
+- **Pattern di interazione**: come usi Claude Code (tool preferiti, comandi frequenti, stile di prompting)
+- **Punti di attrito**: dove il workflow si blocca o rallenta
+- **Suggerimenti personalizzati**: raccomandazioni concrete per migliorare l'efficienza
+
+**Caratteristiche chiave**:
+
+| Aspetto | Dettaglio |
+|---------|-----------|
+| Fonte dati | Cronologia sessioni locale (~30 giorni) |
+| Output | File HTML interattivo in `~/.claude/usage-data/report.html` |
+| Privacy | Elaborazione completamente locale, nessun upload |
+| Frequenza consigliata | Una volta al mese |
+
+> **Tip**: Esegui `/insights` periodicamente per scoprire skill e istruzioni che potrebbero velocizzare il tuo workflow. Man mano che le tue abitudini cambiano, i suggerimenti si aggiornano di conseguenza.
+
+Il comando è disponibile anche da terminale:
+
+```bash
+claude /insights
+```
+
+### `/stats` — Panoramica dell'attività
+
+Mostra statistiche visuali sull'utilizzo quotidiano:
+
+```
+/stats
+```
+
+Include:
+
+- **Uso giornaliero**: frequenza e intensità d'uso nel tempo
+- **Cronologia sessioni**: lista delle sessioni recenti
+- **Streak**: giorni consecutivi di utilizzo
+- **Preferenze modello**: distribuzione dei modelli usati (Opus, Sonnet, Haiku)
+
+Utile per avere un colpo d'occhio rapido sulla propria attività, senza la profondità di analisi di `/insights`.
+
+### `/cost` — Consumo token e costi
+
+Mostra le statistiche di consumo token della sessione corrente:
+
+```
+/cost
+```
+
+Output tipico:
+
+```
+Total cost:            $0.55
+Total duration (API):  6m 19.7s
+Total duration (wall): 6h 33m 10.2s
+Total code changes:    0 lines added, 0 lines removed
+```
+
+> **Nota**: `/cost` mostra stime locali basate sul conteggio token. Per la fatturazione effettiva, consultare la [Console](https://platform.claude.com/usage). Per utenti Pro/Max con abbonamento, `/cost` è meno rilevante — usare `/stats` per monitorare i pattern d'uso.
+
+### Confronto rapido
+
+| Comando | Cosa mostra | Periodo | Output |
+|---------|-------------|---------|--------|
+| `/insights` | Analisi approfondita workflow e suggerimenti | ~30 giorni | HTML interattivo |
+| `/stats` | Attività, streak, modelli preferiti | Storico | Visualizzazione nel terminale |
+| `/cost` | Token consumati e costo stimato | Sessione corrente | Testo nel terminale |
+
+### Analytics di team
+
+Per organizzazioni (Team/Enterprise), esistono dashboard web separate:
+
+- **claude.ai**: [claude.ai/analytics/claude-code](https://claude.ai/analytics/claude-code) — metriche d'uso, contributo PR con integrazione GitHub, leaderboard
+- **API Console**: [platform.claude.com/claude-code](https://platform.claude.com/claude-code) — metriche d'uso, tracking spesa
+
+Queste dashboard sono complementari ai comandi locali: i comandi analizzano il tuo uso personale, le dashboard mostrano metriche aggregate del team.
+
 ## Workflow efficace per il codice
 
 - **Prima di scrivere**: leggere tutti i file rilevanti e capire il requisito completo
