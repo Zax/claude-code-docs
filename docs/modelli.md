@@ -6,8 +6,10 @@
 
 | Modello | ID API | Contesto | Output max | Prezzo (input/output per MTok) |
 |---------|--------|----------|------------|-------------------------------|
-| Claude Opus 4.7 | `claude-opus-4-7` | 1M token | 128k | $5 / $25 |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` | 1M token | 64k | $3 / $15 |
+| Claude Opus 4.7 | `claude-opus-4-7` | 200k token | 128k | $5 / $25 |
+| Claude Opus 4.7 Max | `claude-opus-4-7-max` | **1M token** | 128k | $5 / $25 |
+| Claude Sonnet 4.6 | `claude-sonnet-4-6` | 200k token | 64k | $3 / $15 |
+| Claude Sonnet 4.6 Max | `claude-sonnet-4-6-max` | **1M token** | 64k | $3 / $15 |
 | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | 200k token | 64k | $1 / $5 |
 
 | | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
@@ -39,6 +41,52 @@ Claude Opus 4.7 è il modello più capace attualmente disponibile, con un **migl
 - **Extended thinking rimosso**: Opus 4.7 **non supporta** più extended thinking (`type: "enabled"` con `budget_tokens`). Usa solo adaptive thinking, dove il modello decide autonomamente quanto ragionare.
 - **Nuovo tokenizer**: il tokenizer di Opus 4.7 è diverso dai modelli precedenti. A parità di 1M token di contesto, copre ~555k parole anziché ~750k. Questo significa che lo stesso testo occupa più token rispetto a Opus 4.6/Sonnet 4.6.
 - **Opus 4.6 è ora legacy**: resta disponibile ma non consigliato per nuovi progetti.
+
+---
+
+## Comando /model in Claude Code
+
+Il comando `/model` permette di cambiare modello durante una sessione di Claude Code senza interromperla.
+
+### Utilizzo
+
+```
+/model                    # Mostra il modello corrente e apre il selettore
+/model opus               # Passa a Claude Opus (ultimo disponibile)
+/model sonnet             # Passa a Claude Sonnet (ultimo disponibile)
+/model haiku              # Passa a Claude Haiku (ultimo disponibile)
+/model claude-opus-4-6    # Specifica un model ID esatto
+```
+
+### Modelli specificabili
+
+Si possono usare sia alias brevi che model ID completi:
+
+| Alias / ID | Modello | Contesto |
+|------------|---------|----------|
+| `opus` | Claude Opus 4.7 | 200k |
+| `sonnet` | Claude Sonnet 4.6 | 200k |
+| `haiku` | Claude Haiku 4.5 | 200k |
+| `claude-opus-4-7` | Claude Opus 4.7 | 200k |
+| `claude-sonnet-4-6` | Claude Sonnet 4.6 | 200k |
+| `claude-haiku-4-5-20251001` | Claude Haiku 4.5 | 200k |
+| `claude-opus-4-7-max` | Claude Opus 4.7 Max | **1M** |
+| `claude-sonnet-4-6-max` | Claude Sonnet 4.6 Max | **1M** |
+| `claude-opus-4-6` | Claude Opus 4.6 (legacy) | 200k |
+
+### Varianti Max (contesto 1M)
+
+I modelli con suffisso `-max` offrono una finestra di contesto estesa a **1 milione di token**. Sono utili per:
+
+- Lavorare su codebase molto grandi senza perdere contesto
+- Analisi di documenti lunghi o intere repository
+- Sessioni agentiche prolungate con molti file
+
+**Nota**: le varianti Max hanno lo stesso prezzo per token dei modelli standard, ma consumano più token per sessione dato il contesto più ampio. Richiedono un piano che supporti il contesto esteso.
+
+### Fast mode
+
+Il comando `/fast` attiva la modalità veloce. Usa lo **stesso modello** (non passa a un modello inferiore) ma con output più rapido, utile per task semplici dove la latenza conta più della profondità di ragionamento.
 
 ---
 
@@ -94,7 +142,7 @@ Il modello più rapido ed economico. Ottimo per task ad alto volume o con latenz
 |--------------|:--------:|:----------:|:---------:|
 | Extended thinking | — | ✓ | ✓ |
 | Adaptive thinking | ✓ | ✓ | — |
-| Contesto 1M token | ✓ | ✓ | — |
+| Variante Max (1M token) | ✓ | ✓ | — |
 | Batch API 300k output | ✓ | ✓ | — |
 
 **Extended thinking**: il modello ragiona passo per passo prima di rispondere (visibile nel "thinking block"). Migliora le prestazioni su task complessi. **Non disponibile su Opus 4.7**.
